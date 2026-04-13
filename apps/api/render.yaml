@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: mamacare-api
+    runtime: node
+    region: frankfurt          # Latence réduite pour l'Europe / Afrique de l'Ouest
+    plan: free                 # Passer à "starter" pour prod avec 0 cold start
+    rootDir: apps/api
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+
+      # ── Supabase ─────────────────────────────────────────────────────────
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false            # À renseigner dans le dashboard Render
+
+      # ── Claude API (Anthropic) ────────────────────────────────────────────
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+      # ── WhatsApp Business API ─────────────────────────────────────────────
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+
+      # ── Africa's Talking (SMS fallback) ───────────────────────────────────
+      - key: AFRICA_TALKING_API_KEY
+        sync: false
+      - key: AFRICA_TALKING_USERNAME
+        sync: false
+
+      # ── CORS : domaine Vercel du frontend ─────────────────────────────────
+      - key: FRONTEND_URL
+        sync: false            # ex : https://mamacare.vercel.app
