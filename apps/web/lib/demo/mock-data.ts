@@ -29,7 +29,7 @@ function expectedTermFromSA(sa: number): string {
 
 export const DEMO_DOCTOR = {
   id:       'demo-doctor-1',
-  fullName: 'Dr. Ibrahim Diallo',
+  fullName: 'Dr. Maladho Barry',
   phone:    '+224 624 12 34 56',
   role:     'doctor' as const,
 };

@@ -43,7 +43,7 @@ export function getDemoResponse<T>(path: string, method: string): T {
 
   // ── GET /patients/me/doctor ──────────────────────────────────────────────
   if (method === 'GET' && path === '/patients/me/doctor') {
-    return { fullName: DEMO_DOCTOR.fullName, phone: DEMO_DOCTOR.phone } as unknown as T;
+    return { fullName: 'Dr. Maladho Barry', phone: DEMO_DOCTOR.phone } as unknown as T;
   }
 
   // ── GET /patients/:id ────────────────────────────────────────────────────
