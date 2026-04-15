@@ -7,26 +7,7 @@ import { saveSession } from '@/lib/auth/session';
 import { DEMO_DOCTOR, DEMO_PATIENT_SELF } from '@/lib/demo/mock-data';
 import Button from '@/components/ui/Button';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface DevLoginResponse {
-  accessToken: string;
-  profile: {
-    id:        string;
-    role:      'doctor' | 'patient';
-    full_name: string;
-    phone:     string;
-  };
-}
-
 type Role = 'doctor' | 'patient';
-
-// ─── Constantes ───────────────────────────────────────────────────────────────
-
-const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
-const IS_DEV       = process.env.NODE_ENV === 'development';
-
-// ─── Composant ────────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,45 +16,20 @@ export default function LoginPage() {
   const [loading,     setLoading]     = useState(false);
   const [error,       setError]       = useState<string | null>(null);
   const [loadingRole, setLoadingRole] = useState<Role | null>(null);
-  const [showPhone,   setShowPhone]   = useState(!IS_DEMO_MODE && !IS_DEV);
+  const [showOtp,     setShowOtp]     = useState(false);
 
-  // ── Connexion démo 100% frontend ────────────────────────────────────────────
+  // ── Connexion démo instantanée ───────────────────────────────────────────────
   const handleDemoLogin = (role: Role) => {
+    if (loadingRole) return;
     setLoadingRole(role);
-    const isDemoDoctor = role === 'doctor';
-    const profile = isDemoDoctor ? DEMO_DOCTOR : DEMO_PATIENT_SELF;
-
+    const profile = role === 'doctor' ? DEMO_DOCTOR : DEMO_PATIENT_SELF;
     saveSession({
       token:    'DEMO_TOKEN',
       userId:   profile.id,
       role,
       fullName: profile.fullName,
     });
-
     router.replace(role === 'doctor' ? '/dashboard' : '/questionnaire');
-  };
-
-  // ── Connexion dev (backend local) ────────────────────────────────────────────
-  const handleDevLogin = async (role: Role) => {
-    setError(null);
-    setLoadingRole(role);
-    try {
-      const data = await apiClient.post<DevLoginResponse>(
-        '/auth/dev-login',
-        { role },
-        { skipAuth: true },
-      );
-      saveSession({
-        token:    data.accessToken,
-        userId:   data.profile.id,
-        role:     data.profile.role,
-        fullName: data.profile.full_name,
-      });
-      router.replace(role === 'doctor' ? '/dashboard' : '/questionnaire');
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erreur inattendue.');
-      setLoadingRole(null);
-    }
   };
 
   // ── Connexion OTP ────────────────────────────────────────────────────────────
@@ -92,104 +48,103 @@ export default function LoginPage() {
     }
   };
 
-  // ─── Rendu ────────────────────────────────────────────────────────────────────
-
   return (
     <div className="space-y-4">
 
-      {/* ── Bandeau mode démo ── */}
-      {IS_DEMO_MODE && (
-        <div className="text-center">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
-            <span>🔍</span> Mode démonstration — aucun SMS requis
-          </span>
-        </div>
-      )}
-
-      {/* ── Boutons démo ── */}
-      {(IS_DEMO_MODE || IS_DEV) && !showPhone && (
+      {/* ── Accès démo — toujours visible ── */}
+      {!showOtp && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          {/* Header */}
-          <div className="px-6 pt-6 pb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Accès démo</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Explorez toutes les fonctionnalités sans compte.
+
+          <div className="px-6 pt-6 pb-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full mb-4">
+              <span>🔍</span> Mode démonstration
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">Choisissez un profil</h2>
+            <p className="text-sm text-gray-500 mt-1 mb-5">
+              Accès instantané — aucun mot de passe requis.
             </p>
           </div>
 
           <div className="px-4 pb-5 flex flex-col gap-3">
-            {/* Bouton Médecin */}
+
+            {/* ── Médecin ── */}
             <button
               type="button"
-              onClick={() => IS_DEMO_MODE ? handleDemoLogin('doctor') : handleDevLogin('doctor')}
+              onClick={() => handleDemoLogin('doctor')}
               disabled={loadingRole !== null}
               className="flex items-center gap-4 w-full px-4 py-4 rounded-2xl
-                border-2 border-transparent bg-blue-50 hover:bg-blue-100
+                bg-blue-50 hover:bg-blue-100 border-2 border-blue-100
                 hover:border-blue-300 active:scale-[0.98]
-                transition-all text-left disabled:opacity-50 group"
+                transition-all text-left disabled:opacity-60"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-200 flex items-center justify-center text-2xl shrink-0">
                 👨‍⚕️
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-blue-900">
-                  {loadingRole === 'doctor' ? 'Connexion…' : DEMO_DOCTOR.fullName}
-                </div>
-                <div className="text-xs text-blue-600 mt-0.5">
+                <p className="text-sm font-bold text-blue-900">
+                  {loadingRole === 'doctor' ? 'Connexion en cours…' : DEMO_DOCTOR.fullName}
+                </p>
+                <p className="text-xs text-blue-500 mt-0.5">
                   Dashboard · Patientes · Alertes
-                </div>
+                </p>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-200 text-blue-800 shrink-0">
-                Médecin
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-600 text-white shrink-0">
+                {loadingRole === 'doctor' ? '…' : 'Entrer →'}
               </span>
             </button>
 
-            {/* Bouton Patiente */}
+            {/* ── Patiente ── */}
             <button
               type="button"
-              onClick={() => IS_DEMO_MODE ? handleDemoLogin('patient') : handleDevLogin('patient')}
+              onClick={() => handleDemoLogin('patient')}
               disabled={loadingRole !== null}
               className="flex items-center gap-4 w-full px-4 py-4 rounded-2xl
-                border-2 border-transparent bg-pink-50 hover:bg-pink-100
+                bg-pink-50 hover:bg-pink-100 border-2 border-pink-100
                 hover:border-pink-300 active:scale-[0.98]
-                transition-all text-left disabled:opacity-50 group"
+                transition-all text-left disabled:opacity-60"
             >
               <div className="w-12 h-12 rounded-xl bg-pink-200 flex items-center justify-center text-2xl shrink-0">
                 🤰
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-pink-900">
-                  {loadingRole === 'patient' ? 'Connexion…' : DEMO_PATIENT_SELF.fullName}
-                </div>
-                <div className="text-xs text-pink-600 mt-0.5">
+                <p className="text-sm font-bold text-pink-900">
+                  {loadingRole === 'patient' ? 'Connexion en cours…' : DEMO_PATIENT_SELF.fullName}
+                </p>
+                <p className="text-xs text-pink-500 mt-0.5">
                   Questionnaire · Historique · Résultats
-                </div>
+                </p>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-pink-200 text-pink-800 shrink-0">
-                Patiente
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#E91E8C] text-white shrink-0">
+                {loadingRole === 'patient' ? '…' : 'Entrer →'}
               </span>
             </button>
           </div>
 
-          {/* Lien vers connexion réelle */}
           <div className="border-t border-gray-100 px-6 py-3">
             <button
               type="button"
-              onClick={() => setShowPhone(true)}
+              onClick={() => setShowOtp(true)}
               className="w-full text-xs text-gray-400 hover:text-[#E91E8C] transition-colors text-center py-1"
             >
-              Vous avez un compte ? Se connecter avec un numéro →
+              J'ai un compte → Se connecter avec mon numéro
             </button>
           </div>
         </div>
       )}
 
-      {/* ── Formulaire OTP ── */}
-      {showPhone && (
+      {/* ── Formulaire OTP (compte réel) ── */}
+      {showOtp && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <button
+            type="button"
+            onClick={() => { setShowOtp(false); setError(null); }}
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 mb-5 transition-colors"
+          >
+            ← Retour
+          </button>
           <h2 className="text-lg font-semibold text-gray-800 mb-1">Connexion</h2>
-          <p className="text-sm text-gray-500 mb-6">
-            Entrez votre numéro pour recevoir un code de vérification.
+          <p className="text-sm text-gray-500 mb-5">
+            Entrez votre numéro pour recevoir un code SMS.
           </p>
           <form onSubmit={handleSendOtp} className="space-y-4">
             <div>
@@ -212,26 +167,14 @@ export default function LoginPage() {
                   autoComplete="tel"
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1.5">Vous recevrez un code SMS à 6 chiffres</p>
             </div>
             <Button type="submit" fullWidth isLoading={loading} disabled={phone.length < 8}>
-              Continuer
+              Recevoir le code
             </Button>
           </form>
-
-          {(IS_DEMO_MODE || IS_DEV) && (
-            <button
-              type="button"
-              onClick={() => setShowPhone(false)}
-              className="w-full text-center text-xs text-gray-400 hover:text-[#E91E8C] transition-colors mt-4 py-1"
-            >
-              ← Retour à la démo
-            </button>
-          )}
         </div>
       )}
 
-      {/* ── Erreur ── */}
       {error && (
         <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
           {error}
