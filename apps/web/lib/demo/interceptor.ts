@@ -96,6 +96,11 @@ export function getDemoResponse<T>(path: string, method: string): T {
     return DEMO_HISTORY_DOCTOR as unknown as T;
   }
 
+  // ── GET /questionnaire/today ─────────────────────────────────────────────
+  if (method === 'GET' && path === '/questionnaire/today') {
+    return { submitted: false } as unknown as T;
+  }
+
   // ── POST /questionnaire/submit ───────────────────────────────────────────
   if (method === 'POST' && path === '/questionnaire/submit') {
     return {
@@ -105,10 +110,26 @@ export function getDemoResponse<T>(path: string, method: string): T {
     } as unknown as T;
   }
 
-  // ── Fallback ─────────────────────────────────────────────────────────────
+  // ── GET /auth/me ─────────────────────────────────────────────────────────
+  if (method === 'GET' && path === '/auth/me') {
+    return {
+      id:       DEMO_PATIENT_SELF.id,
+      role:     'patient',
+      fullName: DEMO_PATIENT_SELF.fullName,
+      phone:    DEMO_PATIENT_SELF.phone,
+    } as unknown as T;
+  }
+
+  // ── Fallback : tout autre endpoint → objet vide sans erreur ─────────────
   return {} as T;
 }
 
-export const DEMO_MODE =
-  typeof process !== 'undefined' &&
-  process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+/**
+ * Détecté au runtime via le cookie — fiable même sans variable d'env.
+ * Le token 'DEMO_TOKEN' est posé par handleDemoLogin dans login/page.tsx.
+ */
+export function isDemoMode(): boolean {
+  if (typeof document === 'undefined') return false;
+  return document.cookie.includes('mc_session=') &&
+    decodeURIComponent(document.cookie).includes('"token":"DEMO_TOKEN"');
+}

@@ -10,7 +10,7 @@
  */
 
 import { getSession } from '@/lib/auth/session';
-import { getDemoResponse, DEMO_MODE } from '@/lib/demo/interceptor';
+import { getDemoResponse, isDemoMode } from '@/lib/demo/interceptor';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -38,9 +38,7 @@ async function apiFetch<T>(
   options: ApiFetchOptions = {},
 ): Promise<T> {
   // ── Mode démo : retourner les données mockées sans appel réseau ────────────
-  if (DEMO_MODE) {
-    // Simuler un léger délai réseau (100ms) pour rendre la démo réaliste
-    await new Promise((r) => setTimeout(r, 120));
+  if (isDemoMode()) {
     return getDemoResponse<T>(path, options.method ?? 'GET');
   }
 
