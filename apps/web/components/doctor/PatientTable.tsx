@@ -73,7 +73,16 @@ export default function PatientTable({ patients }: PatientTableProps) {
               <tr
                 key={p.id}
                 onClick={() => router.push(`/patients/${p.id}`)}
-                className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    router.push(`/patients/${p.id}`);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Voir le détail de ${p.full_name}`}
+                className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors focus:outline-none focus:bg-pink-50"
               >
                 <td className="px-5 py-4">
                   <p className="font-medium text-gray-800">{p.full_name}</p>

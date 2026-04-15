@@ -216,6 +216,41 @@ export class PatientsService {
     return this.mapRow(data as PatientRow);
   }
 
+  /**
+   * Retourne les infos du m\u00e9decin d'une patiente (pour les appels d'urgence).
+   */
+  async findMyDoctor(userId: string): Promise<{ fullName: string; phone: string }> {
+    const patient = await this.findByUserId(userId);
+
+    if (isDevMode()) {
+      // En dev, on connait le profil doctor
+      const { DEV_PROFILES } = await import('../../shared/dev-mode');
+      if (patient.doctorId === DEV_PROFILES.doctor.sub) {
+        return {
+          fullName: DEV_PROFILES.doctor.full_name,
+          phone:    DEV_PROFILES.doctor.phone,
+        };
+      }
+      return { fullName: 'Dr. (inconnu)', phone: '+224000000000' };
+    }
+
+    const { data, error } = await this.supabase
+      .getClient()
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', patient.doctorId)
+      .single();
+
+    if (error || !data) {
+      return { fullName: 'Votre m\u00e9decin', phone: '' };
+    }
+
+    return {
+      fullName: (data as { full_name: string }).full_name,
+      phone:    (data as { phone: string }).phone,
+    };
+  }
+
   /** Retourne le nombre de semaines écoulées depuis le début de la grossesse */
   calculatePregnancyWeek(pregnancyStart: Date | string): number {
     const start = new Date(pregnancyStart);

@@ -34,6 +34,13 @@ export class PatientsController {
     return this.patientsService.findByUserId(req.user.id);
   }
 
+  /** GET /patients/me/doctor \u2014 infos du m\u00e9decin de la patiente connect\u00e9e */
+  @Get('me/doctor')
+  @Roles(UserRole.PATIENT)
+  async findMyDoctor(@Req() req: AuthenticatedRequest) {
+    return this.patientsService.findMyDoctor(req.user.id);
+  }
+
   /** GET /patients — liste tri\u00e9e par risque (doctor only) */
   @Get()
   @Roles(UserRole.DOCTOR)

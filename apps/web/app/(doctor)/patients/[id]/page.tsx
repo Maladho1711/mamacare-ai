@@ -217,33 +217,30 @@ export default function PatientDetailPage() {
   const firstPrenom   = patient.full_name.split(' ')[0] ?? patient.full_name;
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-10">
+    <div className="flex flex-col gap-5">
 
-      {/* ── Topbar ── */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              onClick={() => router.back()}
-              className="shrink-0 text-sm text-gray-400 hover:text-[#E91E8C] transition-colors"
-            >
-              ← Retour
-            </button>
-            <h1 className="text-base font-bold text-gray-800 truncate">{patient.full_name}</h1>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => router.push(`/patients/${patient.id}/edit`)}
-              className="text-xs text-gray-400 hover:text-[#E91E8C] transition-colors px-2 py-1"
-            >
-              Modifier
-            </button>
-            <AlertBadge level={patient.risk_level} />
-          </div>
+      {/* ── En-tête de la fiche ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            onClick={() => router.push('/patients')}
+            className="shrink-0 text-sm text-gray-400 hover:text-[#E91E8C] transition-colors"
+          >
+            ← Retour
+          </button>
+          <h1 className="text-base font-bold text-gray-800 truncate">{patient.full_name}</h1>
         </div>
-      </header>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => router.push(`/patients/${patient.id}/edit`)}
+            className="text-xs text-gray-500 hover:text-[#E91E8C] transition-colors px-2 py-1"
+          >
+            Modifier
+          </button>
+          <AlertBadge level={patient.risk_level} />
+        </div>
+      </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-5 flex flex-col gap-5">
 
         {/* ── Carte identité ── */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
@@ -465,9 +462,7 @@ export default function PatientDetailPage() {
             Appeler
           </a>
         </div>
-
-      </div>
-    </main>
+    </div>
   );
 }
 

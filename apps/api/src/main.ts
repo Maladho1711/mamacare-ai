@@ -14,8 +14,20 @@ async function bootstrap() {
     }),
   );
 
+  const allowedOrigins = [
+    process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+    'http://localhost:3002',
+    'http://localhost:3003',
+  ];
+
   app.enableCors({
-    origin: process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
     credentials: true,
   });
 

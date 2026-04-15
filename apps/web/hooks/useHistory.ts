@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { apiClient, ApiError } from '@/lib/api/client';
 import { useSession } from '@/hooks/useSession';
 import { toDateStr } from '@/lib/utils/date';
+import { calcPregnancyWeek } from '@/lib/utils/pregnancy';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -46,8 +47,8 @@ export function useHistory(patientId?: string): UseHistoryReturn {
   const { session, loading: sessionLoading } = useSession({ required: true });
 
   const [cells,         setCells]         = useState<DayCell[]>([]);
-  const [pregnancyWeek] = useState<number | null>(null);
-  const [expectedTerm]  = useState<Date | null>(null);
+  const [pregnancyWeek, setPregnancyWeek] = useState<number | null>(null);
+  const [expectedTerm,  setExpectedTerm]  = useState<Date | null>(null);
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState<string | null>(null);
 
@@ -64,6 +65,17 @@ export function useHistory(patientId?: string): UseHistoryReturn {
 
         const rows = await apiClient.get<ResponseRow[]>(path);
         if (cancelled) return;
+
+        // Charger aussi les infos de grossesse (pour la patiente connectée)
+        if (!patientId) {
+          try {
+            const me = await apiClient.get<{ pregnancyStart: string; expectedTerm: string }>('/patients/me');
+            if (!cancelled) {
+              setPregnancyWeek(calcPregnancyWeek(me.pregnancyStart));
+              setExpectedTerm(new Date(me.expectedTerm));
+            }
+          } catch { /* ignore si patiente sans profil */ }
+        }
 
         // Indexer par date
         const byDate = new Map<string, ResponseRow>();

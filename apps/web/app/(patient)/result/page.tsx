@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api/client';
 import Button from '@/components/ui/Button';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -40,9 +41,15 @@ const LEVEL_CONFIG = {
 
 // ─── Composant ────────────────────────────────────────────────────────────────
 
+interface DoctorInfo {
+  fullName: string;
+  phone: string;
+}
+
 export default function ResultPage() {
   const router = useRouter();
   const [result, setResult] = useState<ResultData | null>(null);
+  const [doctor, setDoctor] = useState<DoctorInfo | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem('mamacare_result');
@@ -53,6 +60,14 @@ export default function ResultPage() {
       router.replace('/questionnaire');
     }
   }, [router]);
+
+  // Charger le num\u00e9ro du m\u00e9decin (pour les alertes rouges)
+  useEffect(() => {
+    if (!result || result.alertLevel !== 'red') return;
+    apiClient.get<DoctorInfo>('/patients/me/doctor')
+      .then(setDoctor)
+      .catch(() => {});
+  }, [result]);
 
   if (!result) return null;
 
@@ -106,15 +121,20 @@ export default function ResultPage() {
         )}
 
         {/* ── Appel urgence (RED) ── */}
-        {result.alertLevel === 'red' && (
+        {result.alertLevel === 'red' && doctor?.phone && (
           <a
-            href="tel:+224621000000"
+            href={`tel:${doctor.phone}`}
             className="flex items-center justify-center gap-2 w-full p-4 rounded-xl
               bg-red-600 text-white font-semibold text-base
               hover:bg-red-700 active:scale-[0.98] transition-all animate-pulse"
           >
-            <span>📞</span> Appeler mon médecin
+            <span>📞</span> Appeler {doctor.fullName || 'mon médecin'}
           </a>
+        )}
+        {result.alertLevel === 'red' && !doctor?.phone && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 text-center">
+            Chargement du contact médecin...
+          </div>
         )}
 
         {/* ── Vigilance (ORANGE) ── */}
