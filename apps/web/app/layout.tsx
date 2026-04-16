@@ -22,7 +22,7 @@ export const viewport: Viewport = {
   themeColor: '#E91E8C',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1, // Désactive le zoom — UX mobile cohérente
+  maximumScale: 5, // WCAG 1.4.4 — le zoom doit rester accessible aux malvoyants
 };
 
 export default function RootLayout({

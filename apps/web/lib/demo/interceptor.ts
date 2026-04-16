@@ -10,6 +10,7 @@
  *   GET  /patients/me/doctor          → médecin de la patiente
  *   GET  /patients/:id                → détail d'une patiente
  *   POST /patients                    → créer une patiente (réponse simulée)
+ *   PATCH /patients/:id               → modifier une patiente (simulé)
  *   GET  /alerts                      → liste alertes
  *   PATCH /alerts/:id/resolve         → résoudre une alerte
  *   GET  /questionnaire/my-history    → historique patiente
@@ -69,6 +70,13 @@ export function getDemoResponse<T>(path: string, method: string): T {
       createdAt:   new Date().toISOString(),
       updatedAt:   new Date().toISOString(),
     } as unknown as T;
+  }
+
+  // ── PATCH /patients/:id ─────────────────────────────────────────────────
+  if (method === 'PATCH' && patientMatch) {
+    const id = patientMatch[1];
+    const patient = DEMO_PATIENTS.find((p) => p.id === id) ?? DEMO_PATIENTS[0]!;
+    return { ...patient, updatedAt: new Date().toISOString() } as unknown as T;
   }
 
   // ── GET /alerts ──────────────────────────────────────────────────────────

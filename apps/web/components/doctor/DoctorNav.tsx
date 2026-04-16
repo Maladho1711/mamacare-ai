@@ -26,13 +26,13 @@ export default function DoctorNav({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [alertCount, setAlertCount] = useState(0);
 
-  // Fetch unresolved alert count
+  // Fetch unresolved alert count — une seule fois au mount, pas à chaque navigation
   useEffect(() => {
     if (sessionLoading || !session) return;
     apiClient.get<AlertApiRow[]>('/alerts')
       .then((data) => setAlertCount(data.filter((a) => !a.resolved_at).length))
       .catch(() => {});
-  }, [sessionLoading, session, pathname]);
+  }, [sessionLoading, session]); // ← pathname retiré : évite 1 appel API par page visitée
 
   const handleLogout = () => {
     clearSession();

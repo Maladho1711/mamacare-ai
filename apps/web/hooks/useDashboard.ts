@@ -17,18 +17,19 @@ import { calcPregnancyWeek } from '@/lib/utils/pregnancy';
 
 /** Shape renvoyée par le backend (IPatient sérialisé). */
 interface ApiPatient {
-  id:              string;
-  userId:          string | null;
-  doctorId:        string;
-  fullName:        string;
-  phone:           string;
-  pregnancyStart:  string;
-  expectedTerm:    string;
-  status:          string;
-  riskLevel:       string;
-  notes?:          string;
-  createdAt:       string;
-  updatedAt:       string;
+  id:                string;
+  userId:            string | null;
+  doctorId:          string;
+  fullName:          string;
+  phone:             string;
+  pregnancyStart:    string;
+  expectedTerm:      string;
+  status:            string;
+  riskLevel:         string;
+  notes?:            string;
+  lastSubmittedAt?:  string | null; // champ optionnel — backend V2
+  createdAt:         string;
+  updatedAt:         string;
 }
 
 /** Shape utilisée par les composants UI du dashboard. */
@@ -77,7 +78,8 @@ function mapPatient(p: ApiPatient): PatientRow {
     status:            p.status,
     pregnancy_start:   p.pregnancyStart,
     expected_term:     p.expectedTerm,
-    last_submitted_at: p.updatedAt, // approximation, API ne renvoie pas ce champ
+    // Utilise lastSubmittedAt si le backend le fournit (V2), sinon null
+    last_submitted_at: p.lastSubmittedAt ?? null,
   };
 }
 
