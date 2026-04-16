@@ -27,8 +27,6 @@ export class JwtGuard implements CanActivate {
     if (isDevMode() && token.startsWith('dev_')) {
       try {
         const payload = verifyDevToken(token);
-        // Normalise la shape pour que les controllers lisent req.user.id
-        // (même contrat qu'en prod, où req.user vient de la table profiles)
         request.user = {
           id:        payload.sub,
           role:      payload.role,
@@ -65,8 +63,24 @@ export class JwtGuard implements CanActivate {
   }
 
   private extractToken(headers: Record<string, string>): string | undefined {
+    // 1. Cookie HttpOnly mc_token (prioritaire — plus sécurisé contre XSS)
+    const cookieToken = this.extractFromCookieHeader(headers['cookie']);
+    if (cookieToken) return cookieToken;
+
+    // 2. Header Authorization Bearer (fallback: démo DEMO_TOKEN, rétrocompat)
     const authHeader = headers['authorization'] ?? '';
     const [type, token] = authHeader.split(' ');
     return type === 'Bearer' ? token : undefined;
+  }
+
+  /** Parse le header Cookie pour extraire mc_token sans cookie-parser */
+  private extractFromCookieHeader(cookieHeader: string | undefined): string | undefined {
+    if (!cookieHeader) return undefined;
+    const match = cookieHeader
+      .split('; ')
+      .find((row) => row.startsWith('mc_token='));
+    if (!match) return undefined;
+    const value = match.substring('mc_token='.length);
+    return value || undefined;
   }
 }

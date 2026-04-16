@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { AlertLevel } from '@mamacare/shared-types';
 import { SupabaseService } from '../../shared/supabase/supabase.service';
@@ -41,7 +42,7 @@ type NotificationLogParams = {
 };
 
 @Injectable()
-export class AlertsService {
+export class AlertsService implements OnModuleInit {
   private readonly logger = new Logger(AlertsService.name);
 
   constructor(
@@ -49,6 +50,20 @@ export class AlertsService {
     private readonly whatsapp: WhatsAppService,
     private readonly sms: SmsService,
   ) {}
+
+  /**
+   * Au démarrage du serveur : traiter les SMS fallback perdus.
+   * Si Render redémarre pendant le délai de 5 min, les alertes sans
+   * WhatsApp ET sans SMS datant de plus de 4 min sont retraitées.
+   */
+  async onModuleInit(): Promise<void> {
+    if (isDevMode()) return;
+    try {
+      await this.processPendingSmsFallbacks();
+    } catch (err) {
+      this.logger.error('Erreur récupération SMS fallbacks au démarrage', err);
+    }
+  }
 
   /**
    * ORDRE IMPÉRATIF — CLAUDE.md Règle 2.
@@ -251,6 +266,38 @@ export class AlertsService {
   // ---------------------------------------------------------------------------
   // Méthodes privées
   // ---------------------------------------------------------------------------
+
+  /**
+   * Cherche les alertes rouge où WhatsApp a échoué et SMS non envoyé,
+   * créées il y a plus de SMS_FALLBACK_DELAY_MS. Les traite immédiatement.
+   * Appelé au démarrage pour récupérer les alertes perdues lors d'un crash.
+   */
+  private async processPendingSmsFallbacks(): Promise<void> {
+    const cutoff = new Date(Date.now() - SMS_FALLBACK_DELAY_MS).toISOString();
+
+    const { data: pending, error } = await this.supabase
+      .getClient()
+      .from('alerts')
+      .select('id, patient_id, message')
+      .eq('whatsapp_sent', false)
+      .eq('sms_sent', false)
+      .is('resolved_at', null)
+      .lt('created_at', cutoff)
+      .limit(20); // Sécurité : pas plus de 20 en une fois
+
+    if (error || !pending || pending.length === 0) return;
+
+    this.logger.warn(
+      `${pending.length} SMS fallback(s) en attente détecté(s) au démarrage`,
+    );
+
+    for (const alert of pending as Array<{ id: string; patient_id: string; message: string }>) {
+      const doctorPhone = await this.getDoctorPhone(alert.patient_id);
+      if (doctorPhone) {
+        await this.sendSmsFallback(alert.id, alert.patient_id, doctorPhone, alert.message);
+      }
+    }
+  }
 
   private async sendSmsFallback(
     alertId: string,

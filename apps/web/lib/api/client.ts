@@ -64,6 +64,7 @@ async function apiFetch<T>(
       ...rest,
       headers,
       signal: controller.signal,
+      credentials: 'include', // Envoie les cookies HttpOnly automatiquement
     });
 
     if (!response.ok) {

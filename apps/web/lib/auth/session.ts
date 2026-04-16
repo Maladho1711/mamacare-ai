@@ -1,12 +1,16 @@
 /**
  * ─── Session management — source unique frontend ─────────────────────────────
  *
- * Stocke l'auth state dans un SEUL cookie `mc_session` (JSON-encoded).
- * Le cookie est lisible par le middleware Next.js (server-side) ET par le
- * client (pour attacher le token aux appels API).
+ * Deux couches :
+ * 1. Cookie `mc_token`  — JWT, HttpOnly, posé par le backend — protégé XSS
+ * 2. Cookie `mc_session` — {userId, role, fullName, token} — lu par le middleware
+ *    et apiClient. Contient le token uniquement pour le mode démo (DEMO_TOKEN).
  *
- * ⚠️ Cookie non-HttpOnly : acceptable en dev. En prod, utiliser httpOnly via
- * un endpoint /auth/set-cookie qui pose le cookie depuis le backend.
+ * En production (OTP flow) : le vrai JWT est dans mc_token (HttpOnly).
+ *   - apiClient envoie credentials:'include' → le cookie est transmis auto.
+ *   - mc_session contient token='' (vide) — uniquement les métadonnées UI.
+ *
+ * En démo : mc_session contient token='DEMO_TOKEN' pour que isDemoMode() fonctionne.
  */
 
 export interface Session {
@@ -16,15 +20,16 @@ export interface Session {
   fullName: string;
 }
 
-const COOKIE_NAME = 'mc_session';
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 jours
+const COOKIE_NAME    = 'mc_session';
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 jours en secondes
 
 // ─── Client-side (browser) ────────────────────────────────────────────────────
 
 export function saveSession(session: Session): void {
   if (typeof document === 'undefined') return;
+  const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : '';
   const encoded = encodeURIComponent(JSON.stringify(session));
-  document.cookie = `${COOKIE_NAME}=${encoded}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
+  document.cookie = `${COOKIE_NAME}=${encoded}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=strict${secure}`;
 }
 
 export function getSession(): Session | null {
@@ -43,15 +48,14 @@ export function getSession(): Session | null {
 
 export function clearSession(): void {
   if (typeof document === 'undefined') return;
+  // Supprimer le cookie UI
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0`;
+  // Demander au backend de supprimer le cookie HttpOnly mc_token
+  void fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
 }
 
 // ─── Server-side (middleware / Server Components) ───────────────────────────
 
-/**
- * Parse un cookie depuis un header `Cookie` (middleware Next.js).
- * Utilisé par middleware.ts qui n'a pas accès à document.cookie.
- */
 export function parseSessionFromCookieHeader(
   cookieHeader: string | null | undefined,
 ): Session | null {

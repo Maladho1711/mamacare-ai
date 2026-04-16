@@ -7,12 +7,11 @@ import { saveSession } from '@/lib/auth/session';
 import OtpInput from '@/components/auth/OtpInput';
 
 interface VerifyResponse {
-  accessToken: string;
   profile: {
-    id: string;
-    role: 'doctor' | 'patient';
+    id:        string;
+    role:      'doctor' | 'patient';
     full_name: string;
-    phone: string;
+    phone:     string;
   };
 }
 
@@ -52,9 +51,9 @@ export default function VerifyForm() {
       );
 
       saveSession({
-        token: data.accessToken,
-        userId: data.profile.id,
-        role: data.profile.role,
+        token:    '',  // Token dans le cookie HttpOnly mc_token posé par le backend
+        userId:   data.profile.id,
+        role:     data.profile.role,
         fullName: data.profile.full_name,
       });
 

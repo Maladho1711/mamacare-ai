@@ -130,6 +130,7 @@ export function useDashboard(): UseDashboardReturn {
   // Realtime : rafraichir quand une alerte ou un changement de patient arrive
   useRealtimeAlerts({
     enabled: !sessionLoading && !!session,
+    doctorId: session?.userId,
     onNewAlert: () => fetchPatients(),
     onPatientUpdated: () => fetchPatients(),
   });
