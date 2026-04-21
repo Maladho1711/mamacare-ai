@@ -3,8 +3,8 @@
 /**
  * ─── Page Alertes (médecin) ─────────────────────────────────────────────────
  *
- * Liste des alertes non résolues — via GET /alerts.
- * Le backend renvoie les mocks en mode dev.
+ * Liste des alertes avec filtres, badges de comptage et cards redessinées.
+ * Données via GET /alerts — backend renvoie les mocks en mode dev.
  */
 
 import { useEffect, useState } from 'react';
@@ -12,9 +12,11 @@ import { useRouter } from 'next/navigation';
 import { apiClient, ApiError } from '@/lib/api/client';
 import { useSession } from '@/hooks/useSession';
 import AlertBadge from '@/components/doctor/AlertBadge';
-import Spinner from '@/components/ui/Spinner';
+import EmptyState from '@/components/ui/EmptyState';
+import FilterChip from '@/components/ui/FilterChip';
+import { useToast } from '@/components/ui/Toast';
 
-// ─── Types (shape renvoyée par le backend NestJS) ───────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface AlertApiRow {
   id:            string;
@@ -44,6 +46,8 @@ interface AlertItem {
   patient_name:  string;
   patient_phone: string;
 }
+
+type FilterKey = 'all' | 'red' | 'orange' | 'resolved';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -82,10 +86,48 @@ function mapAlert(row: AlertApiRow): AlertItem {
   };
 }
 
+/** Style de la card selon le niveau et l'état résolu */
+function cardStyle(alert: AlertItem): string {
+  if (alert.resolved_at) {
+    return 'border-l-4 border-l-gray-200 border-gray-100 opacity-60';
+  }
+  if (alert.alert_type === 'red') {
+    return 'border-l-4 border-l-red-500 border-red-100 bg-red-50/30';
+  }
+  if (alert.alert_type === 'orange') {
+    return 'border-l-4 border-l-orange-400 border-orange-100 bg-orange-50/30';
+  }
+  return 'border-gray-100';
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function AlertSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 animate-pulse">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-20 bg-gray-200 rounded-full" />
+              <div className="h-4 w-16 bg-gray-200 rounded-full" />
+            </div>
+            <div className="h-7 w-24 bg-gray-200 rounded-full" />
+          </div>
+          <div className="h-4 bg-gray-200 rounded-full w-2/3" />
+          <div className="h-3 bg-gray-200 rounded-full w-full" />
+          <div className="h-3 bg-gray-200 rounded-full w-4/5" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Composant ────────────────────────────────────────────────────────────────
 
 export default function AlertsPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const { session, loading: sessionLoading } = useSession({
     required:    true,
     requireRole: 'doctor',
@@ -95,6 +137,7 @@ export default function AlertsPage() {
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState<string | null>(null);
   const [resolving, setResolving] = useState<string | null>(null);
+  const [filter,    setFilter]    = useState<FilterKey>('all');
 
   useEffect(() => {
     if (sessionLoading || !session) return;
@@ -104,7 +147,14 @@ export default function AlertsPage() {
       try {
         const data = await apiClient.get<AlertApiRow[]>('/alerts');
         if (cancelled) return;
-        setAlerts(data.map(mapAlert));
+        // Trier : rouge en premier, puis orange, puis résolues
+        const mapped = data.map(mapAlert);
+        const sorted = [
+          ...mapped.filter((a) => !a.resolved_at && a.alert_type === 'red'),
+          ...mapped.filter((a) => !a.resolved_at && a.alert_type !== 'red'),
+          ...mapped.filter((a) => !!a.resolved_at),
+        ];
+        setAlerts(sorted);
       } catch (err) {
         if (cancelled) return;
         setError(
@@ -117,9 +167,7 @@ export default function AlertsPage() {
       }
     })();
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [sessionLoading, session]);
 
   const resolve = async (alertId: string) => {
@@ -132,17 +180,20 @@ export default function AlertsPage() {
           a.id === alertId ? { ...a, resolved_at: new Date().toISOString() } : a,
         ),
       );
+      showToast('Alerte marquée comme résolue', 'success');
     } catch {
-      /* ignore — l'utilisateur peut retenter */
+      showToast('Erreur lors de la résolution', 'error');
     } finally {
       setResolving(null);
     }
   };
 
+  // ── Rendu loading ────────────────────────────────────────────────────────
   if (loading || sessionLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="lg" />
+      <div className="flex flex-col gap-4 max-w-2xl mx-auto">
+        <div className="h-7 bg-gray-200 rounded-full w-1/3 animate-pulse" />
+        <AlertSkeleton />
       </div>
     );
   }
@@ -155,96 +206,194 @@ export default function AlertsPage() {
     );
   }
 
-  const unresolved = alerts.filter((a) => !a.resolved_at);
-  const ordered = [
-    ...unresolved.filter((a) => a.alert_type === 'red'),
-    ...unresolved.filter((a) => a.alert_type !== 'red'),
-  ];
+  // ── Comptages ─────────────────────────────────────────────────────────────
+  const urgencesCount   = alerts.filter((a) => !a.resolved_at && a.alert_type === 'red').length;
+  const surveillerCount = alerts.filter((a) => !a.resolved_at && a.alert_type === 'orange').length;
+  const resolvedCount   = alerts.filter((a) => !!a.resolved_at).length;
+
+  // ── Filtrage selon le chip actif ──────────────────────────────────────────
+  const filteredAlerts: AlertItem[] = (() => {
+    switch (filter) {
+      case 'red':      return alerts.filter((a) => !a.resolved_at && a.alert_type === 'red');
+      case 'orange':   return alerts.filter((a) => !a.resolved_at && a.alert_type === 'orange');
+      case 'resolved': return alerts.filter((a) => !!a.resolved_at);
+      default:         return alerts;
+    }
+  })();
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Alertes</h1>
-        {unresolved.length > 0 && (
-          <p className="text-xs text-red-600 font-semibold mt-0.5">
-            {unresolved.length} non résolue{unresolved.length !== 1 ? 's' : ''}
-          </p>
-        )}
-      </div>
-        {ordered.length === 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
-            <p className="text-3xl mb-3">✅</p>
-            <p className="text-gray-600 text-sm font-semibold">Aucune alerte en cours</p>
-            <p className="text-gray-400 text-xs mt-1">Toutes les patientes sont suivies.</p>
-          </div>
-        )}
+    <div className="flex flex-col gap-4 max-w-2xl mx-auto">
 
-        {ordered.map((alert) => {
-          const delivery = deliveryStatus(alert);
-          return (
-            <article
-              key={alert.id}
-              className={`
-                bg-white rounded-2xl border shadow-sm flex flex-col gap-3 overflow-hidden
-                ${alert.alert_type === 'red' ? 'border-l-4 border-l-red-500' : 'border-gray-200'}
-              `}
-            >
-              <div className="flex items-start justify-between gap-3 px-4 pt-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <AlertBadge level={alert.alert_type} />
-                    <time className="text-xs text-gray-400" dateTime={alert.created_at}>
+      {/* ── Entête ── */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Alertes</h1>
+          {urgencesCount === 0 && surveillerCount === 0 && (
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
+              Toutes les alertes sont résolues
+            </p>
+          )}
+        </div>
+
+        {/* Badges résumé */}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {urgencesCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950 border border-red-200 dark:border-red-800 text-xs font-bold text-red-700 dark:text-red-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              {urgencesCount} urgence{urgencesCount !== 1 ? 's' : ''}
+            </span>
+          )}
+          {surveillerCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 text-xs font-bold text-orange-700 dark:text-orange-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+              {surveillerCount} à surveiller
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Filtres ── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <FilterChip
+          active={filter === 'all'}
+          onClick={() => setFilter('all')}
+          label={`Toutes (${alerts.length})`}
+        />
+        <FilterChip
+          active={filter === 'red'}
+          onClick={() => setFilter('red')}
+          label={`Urgences${urgencesCount > 0 ? ` (${urgencesCount})` : ''}`}
+          variant="red"
+        />
+        <FilterChip
+          active={filter === 'orange'}
+          onClick={() => setFilter('orange')}
+          label={`À surveiller${surveillerCount > 0 ? ` (${surveillerCount})` : ''}`}
+          variant="orange"
+        />
+        <FilterChip
+          active={filter === 'resolved'}
+          onClick={() => setFilter('resolved')}
+          label={`Résolues${resolvedCount > 0 ? ` (${resolvedCount})` : ''}`}
+          variant="green"
+        />
+      </div>
+
+      {/* ── Liste des alertes ── */}
+      {filteredAlerts.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <EmptyState
+            icon="🔔"
+            title="Aucune alerte dans cette catégorie"
+            description={
+              filter === 'all'
+                ? 'Toutes vos patientes sont stables. Aucune alerte en ce moment.'
+                : 'Aucune alerte correspondant à ce filtre.'
+            }
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filteredAlerts.map((alert) => {
+            const delivery   = deliveryStatus(alert);
+            const isResolved = !!alert.resolved_at;
+
+            return (
+              <article
+                key={alert.id}
+                className={`
+                  bg-white dark:bg-gray-900 rounded-2xl border shadow-sm dark:shadow-black/20 overflow-hidden
+                  transition-all duration-200
+                  ${cardStyle(alert)}
+                `}
+              >
+                {/* ── Ligne supérieure : badge + temps + bouton résoudre ── */}
+                <div className="flex items-start justify-between gap-3 px-4 pt-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <AlertBadge level={isResolved ? 'green' : alert.alert_type} />
+                    {isResolved && (
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Résolue</span>
+                    )}
+                    <time className="text-xs text-gray-400 dark:text-gray-500" dateTime={alert.created_at}>
                       {timeAgo(alert.created_at)}
                     </time>
                   </div>
+
+                  {!isResolved && (
+                    <button
+                      type="button"
+                      onClick={() => { void resolve(alert.id); }}
+                      disabled={resolving === alert.id}
+                      className="shrink-0 text-xs text-white bg-emerald-600 hover:bg-emerald-700
+                        px-3 py-1.5 rounded-full font-semibold transition-colors
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {resolving === alert.id ? '…' : '✓ Résoudre'}
+                    </button>
+                  )}
+                </div>
+
+                {/* ── Patiente ── */}
+                <div className="px-4 pt-2">
                   <button
                     type="button"
                     onClick={() => router.push(`/patients/${alert.patient_id}`)}
-                    className="text-sm font-bold text-gray-800 hover:text-[#E91E8C] transition-colors text-left"
+                    className="flex items-center gap-2 group"
                   >
-                    {alert.patient_name}
+                    <div className="w-7 h-7 rounded-full bg-pink-100 dark:bg-pink-950 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-[#E91E8C]">
+                        {alert.patient_name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-[#E91E8C] transition-colors">
+                        {alert.patient_name}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{alert.patient_phone}</p>
+                    </div>
                   </button>
-                  <p className="text-xs text-gray-400 mt-0.5">{alert.patient_phone}</p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => void resolve(alert.id)}
-                  disabled={resolving === alert.id}
-                  className="shrink-0 text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-full font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {resolving === alert.id ? '…' : '✓ Résoudre'}
-                </button>
-              </div>
+                {/* ── Message ── */}
+                <p className="px-4 pt-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {alert.message}
+                </p>
 
-              <p className="px-4 text-sm text-gray-700 leading-relaxed">
-                {alert.message}
-              </p>
+                {/* ── Pied : statut envoi + actions ── */}
+                <div className="px-4 pb-4 pt-3 flex items-center justify-between border-t border-gray-50 dark:border-gray-800 mt-3">
+                  <span className={`text-xs font-medium ${delivery.className}`}>
+                    {delivery.label}
+                  </span>
 
-              <div className="px-4 pb-4 flex items-center justify-between border-t border-gray-50 pt-3">
-                <span className={`text-xs font-medium ${delivery.className}`}>
-                  {delivery.label}
-                </span>
-                <div className="flex items-center gap-3">
-                  <a
-                    href={whatsappUrl(alert.patient_phone)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-[#25D366] font-semibold hover:underline"
-                  >
-                    WhatsApp
-                  </a>
-                  <a
-                    href={`tel:${alert.patient_phone}`}
-                    className="text-xs text-gray-500 font-medium hover:text-[#E91E8C] transition-colors"
-                  >
-                    📞 Appeler
-                  </a>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/patients/${alert.patient_id}`)}
+                      className="text-xs text-[#E91E8C] font-semibold hover:underline"
+                    >
+                      Voir la fiche
+                    </button>
+                    <a
+                      href={whatsappUrl(alert.patient_phone)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#25D366] font-semibold hover:underline"
+                    >
+                      WhatsApp
+                    </a>
+                    <a
+                      href={`tel:${alert.patient_phone}`}
+                      className="text-xs text-gray-500 dark:text-gray-400 font-medium hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors"
+                    >
+                      Appeler
+                    </a>
+                  </div>
                 </div>
-              </div>
-            </article>
-          );
-        })}
+              </article>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

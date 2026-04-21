@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import ScrollReveal from '@/components/ui/ScrollReveal';
 
 /**
  * Landing page MamaCare AI.
@@ -67,73 +68,76 @@ export default function LandingPage() {
       {/* ── Stats Section ──────────────────────────────────────────────────── */}
       <section className="bg-[#E91E8C] py-12">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-            {[
-              { value: '550', label: 'Décès maternels / 100k', sub: 'en Guinée' },
-              { value: '<3 min', label: 'Questionnaire quotidien', sub: 'simple et rapide' },
-              { value: '<2 min', label: 'Délai d’alerte', sub: 'au médecin' },
-              { value: '24/7', label: 'Surveillance IA', sub: 'protocole OMS' },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="text-3xl md:text-4xl font-bold">{stat.value}</div>
-                <div className="text-sm font-medium mt-1 text-pink-100">{stat.label}</div>
-                <div className="text-xs text-pink-200 mt-0.5">{stat.sub}</div>
-              </div>
-            ))}
-          </div>
+          <ScrollReveal>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+              {[
+                { value: ‘550’, label: ‘Décès maternels / 100k’, sub: ‘en Guinée’ },
+                { value: ‘<3 min’, label: ‘Questionnaire quotidien’, sub: ‘simple et rapide’ },
+                { value: ‘<2 min’, label: "Délai d’alerte", sub: ‘au médecin’ },
+                { value: ‘24/7’, label: ‘Surveillance IA’, sub: ‘protocole OMS’ },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-3xl md:text-4xl font-bold">{stat.value}</div>
+                  <div className="text-sm font-medium mt-1 text-pink-100">{stat.label}</div>
+                  <div className="text-xs text-pink-200 mt-0.5">{stat.sub}</div>
+                </div>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ── Problème ──────────────────────────────────────────────────────── */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Les 3 retards qui tuent
-            </h2>
-            <p className="mt-3 text-gray-600">
-              En Guinée, la mortalité maternelle est liée à trois retards
-              critiques. MamaCare s&apos;attaque aux trois.
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Les 3 retards qui tuent
+              </h2>
+              <p className="mt-3 text-gray-600">
+                En Guinée, la mortalité maternelle est liée à trois retards
+                critiques. MamaCare s&apos;attaque aux trois.
+              </p>
+            </div>
+          </ScrollReveal>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: '⏱',
-                title: 'Retard de décision',
-                desc: 'La femme ne reconnaît pas les signes de danger. MamaCare pose les bonnes questions chaque jour et explique les risques en français simple.',
-                color: 'bg-red-50 text-red-600',
+                icon: ‘⏱️’,
+                title: ‘Retard de décision’,
+                desc: ‘La femme ne reconnaît pas les signes de danger. MamaCare pose les bonnes questions chaque jour et explique les risques en français simple.’,
+                color: ‘bg-red-50 text-red-600’,
               },
               {
-                icon: '��',
-                title: 'Retard d’accès',
-                desc: 'Le médecin est alerté trop tard. MamaCare envoie une alerte WhatsApp + SMS au médecin en moins de 2 minutes.',
-                color: 'bg-orange-50 text-orange-600',
+                icon: ‘📱’,
+                title: "Retard d’accès",
+                desc: "Le médecin est alerté trop tard. MamaCare envoie une alerte WhatsApp + SMS au médecin en moins de 2 minutes.",
+                color: ‘bg-orange-50 text-orange-600’,
               },
               {
-                icon: '��',
-                title: 'Retard de traitement',
-                desc: 'Le médecin manque d’informations. MamaCare fournit l’historique complet des symptômes sur 30 jours avec analyse IA.',
-                color: 'bg-green-50 text-green-600',
+                icon: ‘📋’,
+                title: ‘Retard de traitement’,
+                desc: "Le médecin manque d’informations. MamaCare fournit l’historique complet des symptômes sur 30 jours avec analyse IA.",
+                color: ‘bg-green-50 text-green-600’,
               },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
-              >
-                <div
-                  className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center text-2xl mb-4`}
-                >
-                  {item.icon}
+            ].map((item, i) => (
+              <ScrollReveal key={item.title} delayMs={i * 100}>
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full">
+                  <div
+                    className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center text-2xl mb-4`}
+                  >
+                    {item.icon}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {item.desc}
-                </p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -154,37 +158,39 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-6">
             {[
               {
-                step: '1',
-                title: 'Inscription',
-                desc: 'Le médecin crée le profil de sa patiente. Elle reçoit un lien SMS pour accéder à l’app.',
+                step: ‘1’,
+                title: ‘Inscription’,
+                desc: "Le médecin crée le profil de sa patiente. Elle reçoit un lien SMS pour accéder à l’app.",
               },
               {
-                step: '2',
-                title: 'Questionnaire quotidien',
-                desc: 'Chaque matin, la patiente répond à 10-15 questions simples sur ses symptômes en moins de 3 minutes.',
+                step: ‘2’,
+                title: ‘Questionnaire quotidien’,
+                desc: ‘Chaque matin, la patiente répond à 10-15 questions simples sur ses symptômes en moins de 3 minutes.’,
               },
               {
-                step: '3',
-                title: 'Analyse IA + OMS',
-                desc: 'L’IA analyse les réponses selon les protocoles OMS et attribue un niveau d’alerte : vert, orange ou rouge.',
+                step: ‘3’,
+                title: ‘Analyse IA + OMS’,
+                desc: "L’IA analyse les réponses selon les protocoles OMS et attribue un niveau d’alerte : vert, orange ou rouge.",
               },
               {
-                step: '4',
-                title: 'Alerte au médecin',
-                desc: 'En cas de danger, le médecin reçoit une alerte WhatsApp immédiate avec les détails des symptômes.',
+                step: ‘4’,
+                title: ‘Alerte au médecin’,
+                desc: ‘En cas de danger, le médecin reçoit une alerte WhatsApp immédiate avec les détails des symptômes.’,
               },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-12 h-12 rounded-full bg-[#E91E8C] text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">
-                  {item.step}
+            ].map((item, i) => (
+              <ScrollReveal key={item.step} delayMs={i * 100}>
+                <div className="text-center">
+                  <div className="w-12 h-12 rounded-full bg-[#E91E8C] text-white font-bold text-lg flex items-center justify-center mx-auto mb-4">
+                    {item.step}
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {item.desc}
-                </p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -199,11 +205,12 @@ export default function LandingPage() {
             </h2>
           </div>
 
+          <ScrollReveal>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Patiente */}
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
               <div className="w-14 h-14 rounded-2xl bg-pink-100 flex items-center justify-center text-3xl mb-5">
-                ��
+                🤰
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 Pour les futures mamans
@@ -227,7 +234,7 @@ export default function LandingPage() {
             {/* Médecin */}
             <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
               <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-3xl mb-5">
-                ��
+                🩺
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
                 Pour les médecins
@@ -248,6 +255,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -266,10 +274,10 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: '��', label: 'IA Claude', desc: 'Analyse médicale' },
-              { icon: '��', label: 'Protocole OMS', desc: 'Règles validées' },
-              { icon: '��', label: 'WhatsApp', desc: 'Alertes instant.' },
-              { icon: '��', label: 'PWA Mobile', desc: 'Fonctionne offline' },
+              { icon: '🤖', label: 'IA Claude', desc: 'Analyse médicale' },
+              { icon: '📋', label: 'Protocole OMS', desc: 'Règles validées' },
+              { icon: '💬', label: 'WhatsApp', desc: 'Alertes instant.' },
+              { icon: '📱', label: 'PWA Mobile', desc: 'Fonctionne offline' },
             ].map((tech) => (
               <div
                 key={tech.label}

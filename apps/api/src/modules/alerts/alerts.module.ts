@@ -9,6 +9,6 @@ import { SmsService } from './sms.service';
   imports: [AuthModule],
   controllers: [AlertsController],
   providers: [AlertsService, WhatsAppService, SmsService],
-  exports: [AlertsService],
+  exports: [AlertsService, SmsService],
 })
 export class AlertsModule {}

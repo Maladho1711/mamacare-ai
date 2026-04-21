@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { usePatient } from '@/hooks/usePatient';
 import { apiClient } from '@/lib/api/client';
 import Spinner from '@/components/ui/Spinner';
+import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -89,6 +90,7 @@ function draftKey() {
 export default function QuestionnairePage() {
   const router = useRouter();
   const { patient, loading, error } = usePatient();
+  const { isOnline, pendingCount, queueSubmission, syncNow } = useOfflineQueue();
 
   const [pageStatus,  setPageStatus]  = useState<PageStatus>('loading');
   const [questions,   setQuestions]   = useState<Question[]>([]);
@@ -159,16 +161,29 @@ export default function QuestionnairePage() {
     setPageStatus('submitting');
     setSubmitError('');
 
+    const payload = {
+      responses,
+      type:          patient.type,
+      pregnancyWeek: patient.pregnancyWeek,
+      babyDayOfLife: patient.babyDayOfLife,
+    };
+
+    // Hors-ligne : mettre en file d'attente et afficher un résultat provisoire
+    if (!isOnline) {
+      await queueSubmission('/questionnaire/submit', payload as Record<string, unknown>);
+      localStorage.removeItem(draftKey());
+      // Résultat fictif "vert" affiché hors-ligne — sync réel dès la reconnexion
+      sessionStorage.setItem('mamacare_result', JSON.stringify({
+        alertLevel:     'green',
+        explanation:    'Vos réponses ont été sauvegardées et seront envoyées dès que vous aurez une connexion.',
+        triggeredRules: [],
+      }));
+      router.push('/result');
+      return;
+    }
+
     try {
-      const result = await apiClient.post<SubmitResult>(
-        '/questionnaire/submit',
-        {
-          responses,
-          type:          patient.type,
-          pregnancyWeek: patient.pregnancyWeek,
-          babyDayOfLife: patient.babyDayOfLife,
-        },
-      );
+      const result = await apiClient.post<SubmitResult>('/questionnaire/submit', payload);
       localStorage.removeItem(draftKey());
       sessionStorage.setItem('mamacare_result', JSON.stringify(result));
       router.push('/result');
@@ -178,7 +193,7 @@ export default function QuestionnairePage() {
       setShowConfirm(false);
       setStep(questions.length - 1);
     }
-  }, [responses, patient, questions.length, router]);
+  }, [responses, patient, questions.length, router, isOnline, queueSubmission]);
 
   // ── Rendus conditionnels ──────────────────────────────────────────────────
 
@@ -200,18 +215,49 @@ export default function QuestionnairePage() {
 
   if (pageStatus === 'already-done') {
     const level = todayResult?.alertLevel ?? 'green';
+    const levelIcon  = { green: '🟢', orange: '🟠', red: '🔴' }[level] ?? '🟢';
+    const levelLabel = { green: 'Tout va bien', orange: 'À surveiller', red: 'Urgence' }[level] ?? 'Tout va bien';
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
-        <div className={`w-full max-w-sm rounded-2xl border-2 p-6 ${LEVEL_COLORS[level] ?? ''}`}>
-          <p className="text-lg font-bold mb-2">{LEVEL_LABELS[level] ?? ''}</p>
-          <p className="text-sm">Vous avez déjà rempli votre questionnaire aujourd'hui. Revenez demain.</p>
+        <div className="w-full max-w-sm flex flex-col gap-3 animate-in">
+          {/* Carte principale */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">✅</span>
+            </div>
+            <h2 className="text-lg font-bold text-gray-900 mb-1">
+              Check-up du jour complété !
+            </h2>
+            <p className="text-sm text-gray-500">
+              Vous avez déjà répondu aujourd&apos;hui.
+            </p>
+          </div>
+
+          {/* Résultat */}
+          <div className={`rounded-2xl border-2 p-4 flex items-center gap-3 ${LEVEL_COLORS[level] ?? ''}`}>
+            <span className="text-2xl">{levelIcon}</span>
+            <div>
+              <p className="text-sm font-bold">Résultat : {levelLabel}</p>
+              <p className="text-xs opacity-80 mt-0.5">Votre dernier check-up</p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <button
+            className="w-full py-4 rounded-xl bg-[#E91E8C] text-white font-semibold text-sm
+              hover:bg-[#C9177A] active:scale-[0.98] transition-all shadow-lg shadow-pink-200"
+            onClick={() => router.push('/result')}
+          >
+            Voir mon résultat →
+          </button>
+          <button
+            className="w-full py-3.5 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-sm
+              hover:border-[#E91E8C] hover:text-[#E91E8C] active:scale-[0.98] transition-all"
+            onClick={() => router.push('/history')}
+          >
+            Voir mon historique →
+          </button>
         </div>
-        <button
-          className="mt-6 text-sm text-gray-500 hover:text-[#E91E8C] transition-colors"
-          onClick={() => router.push('/history')}
-        >
-          Voir mon historique →
-        </button>
       </div>
     );
   }
@@ -230,9 +276,9 @@ export default function QuestionnairePage() {
     const answeredQuestions = questions.filter((q) => responses[q.id]);
     return (
       <div className="flex flex-col gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h2 className="text-lg font-bold text-gray-900 mb-1">Confirmer vos réponses</h2>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Confirmer vos réponses</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Vérifiez avant d'envoyer. Vous ne pourrez pas modifier après.
           </p>
 
@@ -240,9 +286,9 @@ export default function QuestionnairePage() {
             {answeredQuestions.map((q) => {
               const choice = q.choices.find((c) => c.value === responses[q.id]);
               return (
-                <div key={q.id} className="flex items-start justify-between gap-2 py-2 border-b border-gray-50 last:border-0">
-                  <span className="text-xs text-gray-500 flex-1">{q.text}</span>
-                  <span className="text-xs font-semibold text-gray-800 shrink-0 bg-gray-100 px-2 py-0.5 rounded-full">
+                <div key={q.id} className="flex items-start justify-between gap-2 py-2 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{q.text}</span>
+                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-200 shrink-0 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                     {choice?.label ?? responses[q.id]}
                   </span>
                 </div>
@@ -261,7 +307,7 @@ export default function QuestionnairePage() {
           </button>
           <button
             onClick={() => { setShowConfirm(false); setStep(questions.length - 1); }}
-            className="text-sm text-gray-400 hover:text-[#E91E8C] transition-colors text-center py-2"
+            className="text-sm text-gray-400 dark:text-gray-500 hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors text-center py-2"
           >
             Modifier mes réponses
           </button>
@@ -285,24 +331,58 @@ export default function QuestionnairePage() {
 
   const progress = Math.round(((step + 1) / questions.length) * 100);
 
+  // Sync auto : si on revient en ligne avec des soumissions en attente → on les envoie
+  // (géré automatiquement par useOfflineQueue)
+
   return (
     <div className="flex flex-col gap-4">
+
+      {/* ── Bannière hors-ligne ── */}
+      {!isOnline && (
+        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700 font-medium">
+          <span aria-hidden="true">📵</span>
+          Hors ligne — vos réponses seront sauvegardées et envoyées à la reconnexion
+        </div>
+      )}
+      {isOnline && pendingCount > 0 && (
+        <button
+          type="button"
+          onClick={() => { void syncNow(); }}
+          className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 text-xs text-emerald-700 font-medium hover:bg-emerald-100 transition-colors"
+        >
+          <span aria-hidden="true">🔄</span>
+          {pendingCount} réponse{pendingCount > 1 ? 's' : ''} en attente — Synchroniser maintenant
+        </button>
+      )}
+
       {/* Barre de progression */}
-      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden" role="progressbar" aria-valuenow={progress} aria-valuemax={100}>
-        <div className="h-2 bg-[#E91E8C] rounded-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+      <div>
+        <div
+          className="w-full h-3 bg-gray-100 rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={progress}
+          aria-valuemax={100}
+        >
+          <div
+            className="h-3 rounded-full transition-all duration-500 ease-out"
+            style={{
+              width: `${progress}%`,
+              background: 'linear-gradient(90deg, #E91E8C 0%, #f472b6 100%)',
+            }}
+          />
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-base font-bold text-gray-700 dark:text-gray-300">
+            {step + 1} <span className="text-gray-400 dark:text-gray-500 font-normal">/ {questions.length}</span>
+          </p>
+          {step === 0 && (
+            <p className="text-xs text-gray-400">~3 min</p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400 font-medium">
-          Question {step + 1}/{questions.length}
-        </p>
-        {step === 0 && (
-          <p className="text-xs text-gray-400">~3 min</p>
-        )}
-      </div>
-
-      <div key={question.id} className="flex flex-col">
-        <h2 className="text-xl font-semibold text-gray-800 leading-snug mb-6">
+      <div key={question.id} className="flex flex-col question-slide">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 leading-snug mb-6">
           {question.text}
         </h2>
 
@@ -313,16 +393,24 @@ export default function QuestionnairePage() {
               <button
                 key={choice.value}
                 onClick={() => { void handleAnswer(question.id, choice.value); }}
-                className={`w-full px-5 py-4 rounded-xl border-2 text-left
+                className={`w-full px-5 py-5 rounded-xl border-2 text-left
                   font-medium transition-all duration-150
-                  active:scale-[0.98]
+                  active:scale-[0.99]
                   focus:outline-none focus:ring-2 focus:ring-[#E91E8C] focus:ring-offset-2
+                  flex items-center justify-between
                   ${isSelected
-                    ? 'border-[#E91E8C] bg-[#FDE8F3] text-[#C9177A]'
-                    : 'border-gray-200 text-gray-700 bg-white hover:border-[#E91E8C] hover:bg-[#FDE8F3] hover:text-[#C9177A]'
+                    ? 'border-[#E91E8C] bg-[#FDE8F3] dark:bg-pink-950 text-[#C9177A]'
+                    : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 hover:border-[#E91E8C] hover:bg-[#FDE8F3] dark:hover:bg-pink-950 hover:text-[#C9177A] dark:focus:ring-offset-gray-950'
                   }`}
               >
-                {choice.label}
+                <span>{choice.label}</span>
+                {isSelected && (
+                  <span className="w-5 h-5 rounded-full bg-[#E91E8C] flex items-center justify-center shrink-0 fade-in">
+                    <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3" aria-hidden="true">
+                      <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                )}
               </button>
             );
           })}

@@ -11,6 +11,9 @@
  *   GET  /patients/:id                → détail d'une patiente
  *   POST /patients                    → créer une patiente (réponse simulée)
  *   PATCH /patients/:id               → modifier une patiente (simulé)
+ *   PATCH /patients/:id/archive       → archiver une patiente (simulé)
+ *   PATCH /patients/:id/reactivate    → réactiver une patiente (simulé)
+ *   GET  /patients/:id/summary        → résumé IA 7 jours (simulé)
  *   GET  /alerts                      → liste alertes
  *   PATCH /alerts/:id/resolve         → résoudre une alerte
  *   GET  /questionnaire/my-history    → historique patiente
@@ -77,6 +80,28 @@ export function getDemoResponse<T>(path: string, method: string): T {
     const id = patientMatch[1];
     const patient = DEMO_PATIENTS.find((p) => p.id === id) ?? DEMO_PATIENTS[0]!;
     return { ...patient, updatedAt: new Date().toISOString() } as unknown as T;
+  }
+
+  // ── PATCH /patients/:id/archive ─────────────────────────────────────────
+  const patientArchiveMatch = path.match(/^\/patients\/([^/]+)\/archive$/);
+  if (method === 'PATCH' && patientArchiveMatch) {
+    return {} as T;
+  }
+
+  // ── PATCH /patients/:id/reactivate ──────────────────────────────────────
+  const patientReactivateMatch = path.match(/^\/patients\/([^/]+)\/reactivate$/);
+  if (method === 'PATCH' && patientReactivateMatch) {
+    return {} as T;
+  }
+
+  // ── GET /patients/:id/summary ────────────────────────────────────────────
+  const patientSummaryMatch = path.match(/^\/patients\/([^/]+)\/summary$/);
+  if (method === 'GET' && patientSummaryMatch) {
+    return {
+      summary:     'Sur les 7 derniers jours, la patiente présente une évolution globalement stable. Un épisode de niveau orange a été relevé (fièvre modérée), suivi d\'un retour à un état normal. Aucun signe d\'alerte rouge n\'a été signalé. La compliance au questionnaire quotidien est bonne. Continuez la surveillance habituelle.',
+      generatedAt: new Date().toISOString(),
+      cached:      false,
+    } as unknown as T;
   }
 
   // ── GET /alerts ──────────────────────────────────────────────────────────

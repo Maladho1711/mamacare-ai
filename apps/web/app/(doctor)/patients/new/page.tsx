@@ -6,6 +6,7 @@ import { apiClient, ApiError } from '@/lib/api/client';
 import { useSession } from '@/hooks/useSession';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ function formatGuineanPhone(raw: string): string {
 
 export default function NewPatientPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const { session, loading: sessionLoading } = useSession({
     required:    true,
     requireRole: 'doctor',
@@ -104,11 +106,12 @@ export default function NewPatientPage() {
         status:         form.status,
         notes:          form.notes.trim() || undefined,
       });
+      showToast('Patiente créée avec succès', 'success');
       router.push('/patients');
     } catch (err) {
-      setGlobalError(
-        err instanceof ApiError ? err.message : 'Erreur lors de la création.',
-      );
+      const msg = err instanceof ApiError ? err.message : 'Erreur lors de la création.';
+      setGlobalError(msg);
+      showToast(msg, 'error');
       setSubmitting(false);
     }
   }

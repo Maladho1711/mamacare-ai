@@ -5,5 +5,9 @@ export default function DoctorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <DoctorNav>{children}</DoctorNav>;
+  return (
+    <DoctorNav>
+      <div className="page-enter">{children}</div>
+    </DoctorNav>
+  );
 }

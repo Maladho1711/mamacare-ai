@@ -21,7 +21,8 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.3.0",
@@ -29,6 +30,7 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
+    "@types/web-push": "^3.6.3",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.5.7",

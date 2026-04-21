@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
 import { AlertLevel } from '@mamacare/shared-types';
-import { MEDICAL_SYSTEM_PROMPT } from './prompts/medical.prompt';
+import {
+  MEDICAL_SYSTEM_PROMPT,
+  buildSummaryPrompt,
+  SummaryHistoryEntry,
+} from './prompts/medical.prompt';
 
 /** Messages de fallback si Claude API est indisponible — règle de sécurité. */
 const FALLBACK_MESSAGES: Record<AlertLevel, string> = {
@@ -84,6 +88,40 @@ export class AiService {
         error,
       );
       return FALLBACK_MESSAGES[alertLevel];
+    }
+  }
+
+  /**
+   * Génère un résumé textuel des 7 derniers jours pour le médecin.
+   *
+   * RÈGLE CRITIQUE — Claude génère UNIQUEMENT le texte de synthèse.
+   * Il ne décide jamais du niveau d'alerte ni de conduite à tenir.
+   */
+  async generatePatientSummary(history: SummaryHistoryEntry[]): Promise<string> {
+    const FALLBACK_SUMMARY =
+      'Résumé temporairement indisponible. Consultez le détail des questionnaires.';
+
+    try {
+      const prompt = buildSummaryPrompt(history);
+
+      const completion = await this.anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }],
+      });
+
+      const block = completion.content[0];
+      if (block && block.type === 'text') {
+        return block.text;
+      }
+
+      return FALLBACK_SUMMARY;
+    } catch (error) {
+      this.logger.error(
+        'Claude API indisponible — résumé de fallback utilisé',
+        error,
+      );
+      return FALLBACK_SUMMARY;
     }
   }
 

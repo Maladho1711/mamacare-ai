@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { apiClient, ApiError } from '@/lib/api/client';
 import { useSession } from '@/hooks/useSession';
 import AlertBadge from '@/components/doctor/AlertBadge';
 import Spinner from '@/components/ui/Spinner';
+import Modal from '@/components/ui/Modal';
+import SkeletonPatientDetail from '@/components/doctor/SkeletonPatientDetail';
+import { useToast } from '@/components/ui/Toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -18,6 +21,9 @@ interface PatientApi {
   pregnancyStart:  string;
   expectedTerm:    string;
   notes?:          string;
+  isActive?:       boolean;
+  archivedAt?:     string | null;
+  archiveReason?:  string | null;
 }
 
 interface PatientDetail {
@@ -29,6 +35,9 @@ interface PatientDetail {
   pregnancy_start: string;
   expected_term: string;
   notes: string | null;
+  is_active: boolean;
+  archived_at: string | null;
+  archive_reason: string | null;
 }
 
 function mapPatient(p: PatientApi): PatientDetail {
@@ -41,6 +50,9 @@ function mapPatient(p: PatientApi): PatientDetail {
     pregnancy_start: p.pregnancyStart,
     expected_term:   p.expectedTerm,
     notes:           p.notes ?? null,
+    is_active:       p.isActive !== false, // true par défaut si absent
+    archived_at:     p.archivedAt ?? null,
+    archive_reason:  p.archiveReason ?? null,
   };
 }
 
@@ -57,6 +69,22 @@ interface GridCell {
   dateStr: string;
   entry:   HistoryEntry | null;
 }
+
+interface AiSummary {
+  text: string;
+  generatedAt: string;
+  cached: boolean;
+}
+
+// ─── Constantes archivage ─────────────────────────────────────────────────────
+
+const ARCHIVE_REASONS = [
+  'Accouchement',
+  'Déménagement',
+  'Fausse couche',
+  'Décès',
+  'Autre',
+] as const;
 
 // ─── Constantes visuelles ─────────────────────────────────────────────────────
 
@@ -132,6 +160,7 @@ export default function PatientDetailPage() {
   const params    = useParams();
   const patientId = params?.id as string;
 
+  const { showToast } = useToast();
   const { session, loading: sessionLoading } = useSession({
     required:    true,
     requireRole: 'doctor',
@@ -143,6 +172,25 @@ export default function PatientDetailPage() {
   const [error,         setError]         = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [updatingRisk,  setUpdatingRisk]  = useState(false);
+
+  // ── Notes inline editing ──
+  const [notesEditing,  setNotesEditing]  = useState(false);
+  const [notesDraft,    setNotesDraft]    = useState<string>('');
+  const [notesSaving,   setNotesSaving]   = useState(false);
+  const [notesError,    setNotesError]    = useState<string | null>(null);
+
+  // ── Feature 2.2 — Archivage ──
+  const [archiveModalOpen,   setArchiveModalOpen]   = useState(false);
+  const [archiveReason,      setArchiveReason]      = useState<string>(ARCHIVE_REASONS[0]);
+  const [archiving,          setArchiving]          = useState(false);
+  const [archiveError,       setArchiveError]       = useState<string | null>(null);
+  const [reactivating,       setReactivating]       = useState(false);
+  const confirmBtnRef = useRef<HTMLButtonElement>(null);
+
+  // ── Feature 3.2 — Résumé IA ──
+  const [summary,        setSummary]        = useState<AiSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError,   setSummaryError]   = useState<string>('');
 
   useEffect(() => {
     if (sessionLoading || !session || !patientId) return;
@@ -178,6 +226,43 @@ export default function PatientDetailPage() {
     };
   }, [sessionLoading, session, patientId, router]);
 
+  // Focus le bouton de confirmation quand la modal s'ouvre
+  useEffect(() => {
+    if (archiveModalOpen) {
+      const t = setTimeout(() => confirmBtnRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [archiveModalOpen]);
+
+  async function saveNotes() {
+    if (!patient || notesSaving) return;
+    setNotesSaving(true);
+    setNotesError(null);
+    try {
+      await apiClient.patch(`/patients/${patient.id}`, { notes: notesDraft });
+      setPatient((p) => (p ? { ...p, notes: notesDraft || null } : p));
+      setNotesEditing(false);
+      showToast('Notes mises à jour', 'success');
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : 'Erreur lors de la sauvegarde';
+      setNotesError(msg);
+      showToast(msg, 'error');
+    } finally {
+      setNotesSaving(false);
+    }
+  }
+
+  function openNotesEdit() {
+    setNotesDraft(patient?.notes ?? '');
+    setNotesError(null);
+    setNotesEditing(true);
+  }
+
+  function cancelNotesEdit() {
+    setNotesEditing(false);
+    setNotesError(null);
+  }
+
   async function updateRiskLevel(level: string) {
     if (!patient || updatingRisk) return;
     setUpdatingRisk(true);
@@ -190,14 +275,75 @@ export default function PatientDetailPage() {
     setUpdatingRisk(false);
   }
 
+  // ── Feature 2.2 — Handlers archivage ──
+
+  function openArchiveModal() {
+    setArchiveReason(ARCHIVE_REASONS[0]);
+    setArchiveError(null);
+    setArchiveModalOpen(true);
+  }
+
+  function closeArchiveModal() {
+    if (archiving) return;
+    setArchiveModalOpen(false);
+    setArchiveError(null);
+  }
+
+  async function confirmArchive() {
+    if (!patient || archiving) return;
+    setArchiving(true);
+    setArchiveError(null);
+    try {
+      await apiClient.patch(`/patients/${patient.id}/archive`, { reason: archiveReason });
+      setArchiveModalOpen(false);
+      showToast('Patiente archivée', 'info');
+      router.push('/patients');
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : 'Erreur lors de l\'archivage';
+      setArchiveError(msg);
+      showToast(msg, 'error');
+      setArchiving(false);
+    }
+  }
+
+  async function reactivatePatient() {
+    if (!patient || reactivating) return;
+    setReactivating(true);
+    try {
+      await apiClient.patch(`/patients/${patient.id}/reactivate`, {});
+      setPatient((p) =>
+        p ? { ...p, is_active: true, archived_at: null, archive_reason: null } : p,
+      );
+      showToast('Patiente réactivée', 'success');
+    } catch {
+      showToast('Erreur lors de la réactivation', 'error');
+    } finally {
+      setReactivating(false);
+    }
+  }
+
+  // ── Feature 3.2 — Résumé IA ──
+
+  async function loadSummary() {
+    if (!patient || summaryLoading) return;
+    setSummaryLoading(true);
+    setSummaryError('');
+    try {
+      const data = await apiClient.get<{ summary: string; generatedAt: string; cached: boolean }>(
+        `/patients/${patient.id}/summary`,
+      );
+      setSummary({ text: data.summary, generatedAt: data.generatedAt, cached: data.cached });
+    } catch {
+      setSummaryError('Impossible de générer le résumé.');
+    } finally {
+      setSummaryLoading(false);
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
 
   if (loading || sessionLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <SkeletonPatientDetail />;
   }
 
   if (error) {
@@ -220,20 +366,20 @@ export default function PatientDetailPage() {
     <div className="flex flex-col gap-5">
 
       {/* ── En-tête de la fiche ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => router.push('/patients')}
-            className="shrink-0 text-sm text-gray-400 hover:text-[#E91E8C] transition-colors"
+            className="shrink-0 text-sm text-gray-400 dark:text-gray-500 hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors"
           >
             ← Retour
           </button>
-          <h1 className="text-base font-bold text-gray-800 truncate">{patient.full_name}</h1>
+          <h1 className="text-base font-bold text-gray-800 dark:text-gray-100 truncate">{patient.full_name}</h1>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => router.push(`/patients/${patient.id}/edit`)}
-            className="text-xs text-gray-500 hover:text-[#E91E8C] transition-colors px-2 py-1"
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors px-2 py-1"
           >
             Modifier
           </button>
@@ -243,7 +389,24 @@ export default function PatientDetailPage() {
 
 
         {/* ── Carte identité ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 flex flex-col gap-4">
+
+          {/* ── Feature 2.2 — Bandeau archivage ── */}
+          {!patient.is_active && (
+            <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
+              <span aria-hidden="true" className="shrink-0 text-base leading-snug">🗃️</span>
+              <p className="text-xs text-red-700 leading-relaxed">
+                <span className="font-semibold">Patiente archivée</span>
+                {patient.archived_at && (
+                  <> le {fmtDate(patient.archived_at)}</>
+                )}
+                {patient.archive_reason && (
+                  <> — Raison&nbsp;: {patient.archive_reason}</>
+                )}
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <InfoItem label="Téléphone" value={patient.phone} />
             <InfoItem
@@ -257,12 +420,106 @@ export default function PatientDetailPage() {
             <InfoItem label="Terme prévu" value={fmtDate(patient.expected_term)} />
           </div>
 
-          {patient.notes && (
-            <div className="bg-gray-50 rounded-xl px-4 py-3">
-              <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Notes cliniques</p>
-              <p className="text-sm text-gray-600 leading-relaxed">{patient.notes}</p>
+          {/* ── Notes cliniques — édition inline ── */}
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wide">
+                Notes cliniques
+              </p>
+              {!notesEditing && (
+                <button
+                  type="button"
+                  onClick={openNotesEdit}
+                  className="text-xs text-gray-400 hover:text-[#E91E8C] transition-colors
+                    px-2 py-0.5 rounded-lg hover:bg-pink-50 focus:outline-none
+                    focus:ring-2 focus:ring-[#E91E8C] focus:ring-offset-1"
+                  aria-label="Modifier les notes cliniques"
+                >
+                  Modifier
+                </button>
+              )}
             </div>
-          )}
+
+            {notesEditing ? (
+              /* ── État édition ── */
+              <div className="flex flex-col gap-2 mt-1">
+                <div className="relative">
+                  <textarea
+                    value={notesDraft}
+                    onChange={(e) => setNotesDraft(e.target.value.slice(0, 1000))}
+                    rows={4}
+                    maxLength={1000}
+                    disabled={notesSaving}
+                    placeholder="Saisir des notes cliniques..."
+                    className="w-full resize-none rounded-lg border border-gray-200 bg-white
+                      px-3 py-2 text-sm text-gray-700 leading-relaxed
+                      placeholder:text-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#E91E8C] focus:border-transparent
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-all duration-150"
+                  />
+                  <span className="absolute bottom-2 right-2 text-[10px] text-gray-300 select-none">
+                    {notesDraft.length}/1000
+                  </span>
+                </div>
+
+                {notesError && (
+                  <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                    {notesError}
+                  </p>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={notesSaving}
+                    onClick={() => { void saveNotes(); }}
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl
+                      bg-[#E91E8C] text-white text-xs font-semibold
+                      hover:bg-[#d01880] active:scale-[0.98]
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-all duration-150 focus:outline-none focus:ring-2
+                      focus:ring-[#E91E8C] focus:ring-offset-2"
+                  >
+                    {notesSaving ? (
+                      <>
+                        <Spinner size="sm" />
+                        Sauvegarde...
+                      </>
+                    ) : (
+                      'Sauvegarder'
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={notesSaving}
+                    onClick={cancelNotesEdit}
+                    className="px-4 py-2 rounded-xl border border-gray-200 text-xs font-semibold
+                      text-gray-500 hover:border-gray-300 hover:text-gray-700
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-all duration-150 focus:outline-none focus:ring-2
+                      focus:ring-gray-300 focus:ring-offset-2"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            ) : patient.notes ? (
+              /* ── État lecture avec contenu ── */
+              <p className="text-sm text-gray-600 leading-relaxed">{patient.notes}</p>
+            ) : (
+              /* ── État vide ── */
+              <button
+                type="button"
+                onClick={openNotesEdit}
+                className="text-sm text-gray-400 hover:text-[#E91E8C] transition-colors
+                  focus:outline-none focus:ring-2 focus:ring-[#E91E8C] focus:ring-offset-1
+                  rounded"
+              >
+                Aucune note — Ajouter une note
+              </button>
+            )}
+          </div>
 
           <div className={`
             flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold
@@ -276,10 +533,90 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
-        {/* ── Graphique évolution 30 jours (F06) ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        {/* ── Feature 3.2 — Résumé IA 7 jours ── */}
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wide">
+              Résumé IA — 7 derniers jours
+            </p>
+            {summary && !summaryLoading && (
+              <button
+                type="button"
+                onClick={() => { void loadSummary(); }}
+                className="text-xs text-gray-400 hover:text-[#E91E8C] transition-colors
+                  px-2 py-1 rounded-lg hover:bg-pink-50 flex items-center gap-1
+                  focus:outline-none focus:ring-2 focus:ring-[#E91E8C] focus:ring-offset-1"
+                aria-label="Régénérer le résumé IA"
+              >
+                <span aria-hidden="true">🔄</span>
+                Régénérer
+              </button>
+            )}
+          </div>
+
+          {/* État : loading */}
+          {summaryLoading && (
+            <div className="flex items-center gap-3 py-4">
+              <Spinner size="sm" />
+              <p className="text-sm text-gray-500">Analyse en cours...</p>
+            </div>
+          )}
+
+          {/* État : erreur */}
+          {!summaryLoading && summaryError && (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-red-600 bg-red-50 rounded-xl px-4 py-3">
+                {summaryError}
+              </p>
+              <button
+                type="button"
+                onClick={() => { void loadSummary(); }}
+                className="self-start text-xs text-gray-500 hover:text-[#E91E8C]
+                  transition-colors focus:outline-none focus:ring-2
+                  focus:ring-[#E91E8C] focus:ring-offset-1 rounded px-1"
+              >
+                Réessayer
+              </button>
+            </div>
+          )}
+
+          {/* État : résumé disponible */}
+          {!summaryLoading && !summaryError && summary && (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{summary.text}</p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-gray-400">
+                  Généré le {fmtDate(summary.generatedAt)}
+                </span>
+                {summary.cached && (
+                  <span className="text-[10px] text-gray-300">• depuis le cache</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* État : pas encore chargé */}
+          {!summaryLoading && !summaryError && !summary && (
+            <button
+              type="button"
+              onClick={() => { void loadSummary(); }}
+              className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200
+                text-sm text-gray-400 font-medium
+                hover:border-[#E91E8C] hover:text-[#E91E8C] hover:bg-pink-50
+                active:scale-[0.99] transition-all duration-150
+                flex items-center justify-center gap-2
+                focus:outline-none focus:ring-2 focus:ring-[#E91E8C] focus:ring-offset-2"
+            >
+              <span aria-hidden="true">🤖</span>
+              Générer le résumé IA
+            </button>
+          )}
+        </div>
+
+        {/* ── Graphique évolution 30 jours (F06) ── */}
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wide">
               Évolution — 30 derniers jours
             </p>
             <div className="flex items-center gap-3 text-[10px] text-gray-400">
@@ -462,6 +799,130 @@ export default function PatientDetailPage() {
             Appeler
           </a>
         </div>
+
+        {/* ── Feature 2.2 — Bouton archiver / réactiver ── */}
+        <div className="pb-2">
+          {patient.is_active ? (
+            <button
+              type="button"
+              onClick={openArchiveModal}
+              className="w-full py-3.5 rounded-xl border-2 border-red-200 text-red-600
+                text-sm font-semibold
+                hover:bg-red-50 hover:border-red-300 active:scale-[0.99]
+                transition-all duration-150
+                flex items-center justify-center gap-2
+                focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+            >
+              <span aria-hidden="true">🗃️</span>
+              Archiver la patiente
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={reactivating}
+              onClick={() => { void reactivatePatient(); }}
+              className="w-full py-3.5 rounded-xl border-2 border-gray-200 text-gray-600
+                text-sm font-semibold
+                hover:bg-gray-50 hover:border-gray-300 active:scale-[0.99]
+                disabled:opacity-50 disabled:cursor-not-allowed
+                transition-all duration-150
+                flex items-center justify-center gap-2
+                focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+            >
+              {reactivating ? (
+                <>
+                  <Spinner size="sm" />
+                  Réactivation...
+                </>
+              ) : (
+                <>
+                  <span aria-hidden="true">♻️</span>
+                  Réactiver la patiente
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+      {/* ── Feature 2.2 — Modal de confirmation d'archivage ── */}
+      <Modal
+        open={archiveModalOpen}
+        onClose={closeArchiveModal}
+        title="Archiver la patiente ?"
+        actions={
+          <>
+            <button
+              type="button"
+              disabled={archiving}
+              onClick={closeArchiveModal}
+              className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold
+                text-gray-500 hover:border-gray-300 hover:text-gray-700
+                disabled:opacity-50 disabled:cursor-not-allowed
+                transition-all duration-150 focus:outline-none focus:ring-2
+                focus:ring-gray-300 focus:ring-offset-2"
+            >
+              Annuler
+            </button>
+            <button
+              ref={confirmBtnRef}
+              type="button"
+              disabled={archiving}
+              onClick={() => { void confirmArchive(); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl
+                bg-red-600 text-white text-sm font-semibold
+                hover:bg-red-700 active:scale-[0.98]
+                disabled:opacity-50 disabled:cursor-not-allowed
+                transition-all duration-150 focus:outline-none focus:ring-2
+                focus:ring-red-500 focus:ring-offset-2"
+            >
+              {archiving ? (
+                <>
+                  <Spinner size="sm" />
+                  Archivage...
+                </>
+              ) : (
+                'Confirmer l\'archivage'
+              )}
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-gray-600 text-sm leading-relaxed">
+            Cette patiente n'apparaîtra plus dans votre dashboard actif.
+          </p>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="archive-reason"
+              className="text-xs font-semibold text-gray-500 uppercase tracking-wide"
+            >
+              Raison
+            </label>
+            <select
+              id="archive-reason"
+              value={archiveReason}
+              onChange={(e) => setArchiveReason(e.target.value)}
+              disabled={archiving}
+              className="w-full rounded-xl border border-gray-200 bg-white
+                px-3 py-2.5 text-sm text-gray-700
+                focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent
+                disabled:opacity-50 disabled:cursor-not-allowed
+                transition-all duration-150"
+            >
+              {ARCHIVE_REASONS.map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+
+          {archiveError && (
+            <p className="text-xs text-red-600 bg-red-50 rounded-xl px-3 py-2">
+              {archiveError}
+            </p>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -471,8 +932,8 @@ export default function PatientDetailPage() {
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">{label}</p>
-      <p className="text-sm text-gray-800 font-semibold mt-0.5">{value}</p>
+      <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">{label}</p>
+      <p className="text-sm text-gray-800 dark:text-gray-100 font-semibold mt-0.5">{value}</p>
     </div>
   );
 }

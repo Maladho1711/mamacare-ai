@@ -6,6 +6,7 @@ import { apiClient, ApiError } from '@/lib/api/client';
 import { useSession } from '@/hooks/useSession';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
+import { useToast } from '@/components/ui/Toast';
 
 interface PatientApi {
   id:              string;
@@ -35,6 +36,7 @@ export default function EditPatientPage() {
   const params    = useParams();
   const patientId = params?.id as string;
 
+  const { showToast } = useToast();
   const { session, loading: sessionLoading } = useSession({
     required:    true,
     requireRole: 'doctor',
@@ -114,11 +116,12 @@ export default function EditPatientPage() {
         status:         form.status,
         notes:          form.notes.trim() || null,
       });
+      showToast('Modifications enregistrées', 'success');
       router.push(`/patients/${patientId}`);
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : 'Erreur lors de la mise à jour.',
-      );
+      const msg = err instanceof ApiError ? err.message : 'Erreur lors de la mise à jour.';
+      setError(msg);
+      showToast(msg, 'error');
       setSubmitting(false);
     }
   }

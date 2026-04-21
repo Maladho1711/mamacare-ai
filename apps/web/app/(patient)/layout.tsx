@@ -5,5 +5,9 @@ export default function PatientLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <PatientNav>{children}</PatientNav>;
+  return (
+    <PatientNav>
+      <div className="page-enter">{children}</div>
+    </PatientNav>
+  );
 }

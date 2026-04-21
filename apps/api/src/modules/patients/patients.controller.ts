@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import { Roles } from '../../shared/decorators/roles.decorator';
 import { PatientsService } from './patients.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
+import { ArchivePatientDto } from './dto/archive-patient.dto';
 
 interface AuthenticatedRequest {
   user: { id: string; role: UserRole };
@@ -41,11 +43,24 @@ export class PatientsController {
     return this.patientsService.findMyDoctor(req.user.id);
   }
 
-  /** GET /patients — liste tri\u00e9e par risque (doctor only) */
+  /** GET /patients — liste triée par risque (doctor only) */
   @Get()
   @Roles(UserRole.DOCTOR)
-  findAll(@Req() req: AuthenticatedRequest) {
-    return this.patientsService.findAll(req.user.id);
+  findAll(
+    @Req() req: AuthenticatedRequest,
+    @Query('includeArchived') includeArchived?: string,
+  ) {
+    return this.patientsService.findAll(
+      req.user.id,
+      includeArchived === 'true',
+    );
+  }
+
+  /** GET /patients/:id/summary — résumé IA des 7 derniers jours (doctor only) */
+  @Get(':id/summary')
+  @Roles(UserRole.DOCTOR)
+  getSummary(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.patientsService.generateSummary(id, req.user.id);
   }
 
   /** GET /patients/:id — fiche patiente (doctor only) */
@@ -72,5 +87,26 @@ export class PatientsController {
     @Req() req: AuthenticatedRequest,
   ) {
     return this.patientsService.update(id, req.user.id, dto);
+  }
+
+  /** PATCH /patients/:id/archive — archiver une patiente (doctor only) */
+  @Patch(':id/archive')
+  @Roles(UserRole.DOCTOR)
+  archive(
+    @Param('id') id: string,
+    @Body() dto: ArchivePatientDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.patientsService.archive(id, req.user.id, dto.reason);
+  }
+
+  /** PATCH /patients/:id/reactivate — réactiver une patiente archivée (doctor only) */
+  @Patch(':id/reactivate')
+  @Roles(UserRole.DOCTOR)
+  reactivate(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.patientsService.reactivate(id, req.user.id);
   }
 }

@@ -34,13 +34,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'bg-[#E91E8C] text-white hover:bg-[#C9177A] active:bg-[#A81266] focus:ring-[#E91E8C] shadow-sm',
+        'bg-[#E91E8C] text-white hover:bg-[#C9177A] active:bg-[#A81266] focus:ring-[#E91E8C] shadow-sm' +
+        ' dark:bg-[#E91E8C] dark:hover:bg-[#C9177A] dark:focus:ring-offset-gray-900',
       outline:
-        'border-2 border-[#E91E8C] text-[#E91E8C] hover:bg-[#FDE8F3] focus:ring-[#E91E8C]',
+        'border-2 border-[#E91E8C] text-[#E91E8C] hover:bg-[#FDE8F3] focus:ring-[#E91E8C]' +
+        ' dark:border-[#E91E8C] dark:text-[#E91E8C] dark:hover:bg-pink-950 dark:focus:ring-offset-gray-900',
       ghost:
-        'text-gray-600 hover:bg-gray-100 active:bg-gray-200 focus:ring-gray-300',
+        'text-gray-600 hover:bg-gray-100 active:bg-gray-200 focus:ring-gray-300' +
+        ' dark:text-gray-300 dark:hover:bg-gray-800 dark:active:bg-gray-700 dark:focus:ring-gray-600 dark:focus:ring-offset-gray-900',
       danger:
-        'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500 shadow-sm',
+        'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500 shadow-sm' +
+        ' dark:bg-red-700 dark:hover:bg-red-600 dark:focus:ring-offset-gray-900',
     };
 
     return (

@@ -8,12 +8,14 @@ import { apiClient } from '@/lib/api/client';
 import { clearSession } from '@/lib/auth/session';
 import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/shared/BottomNav';
-import { ChartIcon, UsersIcon, BellIcon, LogoutIcon, HeartIcon } from '@/components/icons';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { ChartIcon, UsersIcon, BellIcon, LogoutIcon, HeartIcon, UserIcon } from '@/components/icons';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/patients', label: 'Patientes' },
   { href: '/alerts', label: 'Alertes' },
+  { href: '/profile', label: 'Mon profil' },
 ];
 
 interface AlertApiRow {
@@ -40,16 +42,16 @@ export default function DoctorNav({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
       {/* Header sticky */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm dark:shadow-black/20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-[#E91E8C] flex items-center justify-center">
               <HeartIcon size={18} className="text-white" />
             </div>
-            <span className="text-base font-bold text-gray-900 hidden sm:block">MamaCare</span>
+            <span className="text-base font-bold text-gray-900 dark:text-gray-100 hidden sm:block">MamaCare</span>
           </Link>
 
           {/* Nav desktop */}
@@ -62,8 +64,8 @@ export default function DoctorNav({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-pink-50 text-[#E91E8C]'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-pink-50 dark:bg-pink-950 text-[#E91E8C]'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
                   }`}
                 >
                   {item.label}
@@ -72,18 +74,19 @@ export default function DoctorNav({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          {/* User + logout */}
-          <div className="flex items-center gap-3">
+          {/* User + toggle + logout */}
+          <div className="flex items-center gap-2">
             {session && (
-              <span className="text-xs text-gray-500 hidden sm:block">
+              <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                 {session.fullName}
               </span>
             )}
+            <ThemeToggle />
             <button
               type="button"
               onClick={handleLogout}
-              className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-              title="Se d&eacute;connecter"
+              className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+              title="Se déconnecter"
             >
               <LogoutIcon size={18} />
             </button>
@@ -102,6 +105,7 @@ export default function DoctorNav({ children }: { children: React.ReactNode }) {
           { href: '/dashboard', label: 'Dashboard', icon: <ChartIcon size={20} /> },
           { href: '/patients', label: 'Patientes', icon: <UsersIcon size={20} /> },
           { href: '/alerts', label: 'Alertes', icon: <BellIcon size={20} />, badge: alertCount },
+          { href: '/profile', label: 'Profil', icon: <UserIcon size={20} /> },
         ]}
       />
     </div>
