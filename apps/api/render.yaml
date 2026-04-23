@@ -37,3 +37,53 @@ services:
       # ── CORS : domaine Vercel du frontend ─────────────────────────────────
       - key: FRONTEND_URL
         sync: false            # ex : https://mamacare.vercel.app
+
+      # ── Secret partagé avec le cron (protection endpoint interne) ─────────
+      - key: INTERNAL_CRON_SECRET
+        sync: false
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # Cron — rappels quotidiens questionnaire (8h00 UTC = 8h00 Conakry)
+  # Déclenche POST /notifications/send-daily-reminders toutes les 24h.
+  # ══════════════════════════════════════════════════════════════════════════
+  - type: cron
+    name: mamacare-daily-reminders
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: apps/api
+    schedule: "0 8 * * *"
+    buildCommand: npm install
+    startCommand: |
+      curl -sS -X POST \
+        -H "x-internal-secret: $INTERNAL_CRON_SECRET" \
+        -H "Content-Type: application/json" \
+        "$API_URL/notifications/send-daily-reminders"
+    envVars:
+      - key: API_URL
+        value: https://mamacare-api.onrender.com
+      - key: INTERNAL_CRON_SECRET
+        sync: false
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # Cron — rappels de rendez-vous J-1 (18h00 UTC la veille du RDV)
+  # Déclenche POST /appointments/send-reminders.
+  # ══════════════════════════════════════════════════════════════════════════
+  - type: cron
+    name: mamacare-appointment-reminders
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: apps/api
+    schedule: "0 18 * * *"
+    buildCommand: npm install
+    startCommand: |
+      curl -sS -X POST \
+        -H "x-internal-secret: $INTERNAL_CRON_SECRET" \
+        -H "Content-Type: application/json" \
+        "$API_URL/appointments/send-reminders"
+    envVars:
+      - key: API_URL
+        value: https://mamacare-api.onrender.com
+      - key: INTERNAL_CRON_SECRET
+        sync: false

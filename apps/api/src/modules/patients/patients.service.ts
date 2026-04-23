@@ -428,7 +428,7 @@ export class PatientsService implements OnModuleInit {
       .select('submitted_at, alert_level, triggered_rules, ai_analysis')
       .eq('patient_id', patientId)
       .order('submitted_at', { ascending: false })
-      .limit(7);
+      .limit(30);
 
     if (error) throw new InternalServerErrorException(error.message);
 
