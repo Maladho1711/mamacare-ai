@@ -59,7 +59,20 @@ npx --yes supabase@latest secrets set \
   AFRICA_TALKING_API_KEY="$AFRICA_TALKING_API_KEY"
 
 echo ""
-echo "✅ Secrets configurés. La Edge Function utilisera ces valeurs au prochain appel."
+echo "✅ Secrets configurés."
+echo ""
+
+# ─── Redéployer la Edge Function avec la dernière version du code ────────────
+echo "🔄 Redéploiement de la Edge Function api..."
+cd "$(dirname "$0")"
+npx --yes supabase@latest functions deploy api \
+  --project-ref "$PROJECT_REF" \
+  --no-verify-jwt \
+  --use-api
+
+echo ""
+echo "✅ Edge Function déployée avec les nouveaux secrets."
 echo ""
 echo "🧪 Test :"
 echo "   curl https://${PROJECT_REF}.supabase.co/functions/v1/api"
+echo "   curl https://${PROJECT_REF}.supabase.co/functions/v1/api/notifications/vapid-public-key"
