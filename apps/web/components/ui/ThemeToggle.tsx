@@ -2,7 +2,7 @@
 
 import { useTheme } from '@/components/ui/ThemeProvider';
 
-// ─── Icônes inline (pas de dépendance externe) ────────────────────────────────
+// --- Icônes inline (pas de dépendance externe) --------------------------------
 
 function SunIcon() {
   return (
@@ -60,7 +60,7 @@ function SystemIcon() {
   );
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function ThemeToggle() {
   const { theme, setTheme, isDark } = useTheme();

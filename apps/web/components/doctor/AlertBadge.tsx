@@ -1,6 +1,6 @@
 'use client';
 
-// ─── AlertBadge ───────────────────────────────────────────────────────────────
+// --- AlertBadge ---------------------------------------------------------------
 // Petite pastille colorée pour afficher le niveau de risque d'une patiente.
 
 type Level = 'green' | 'orange' | 'red' | string;

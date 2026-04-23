@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── useHistory ────────────────────────────────────────────────────────────
+ * --- useHistory ------------------------------------------------------------
  *
  * Charge l'historique 30 jours d'une patiente.
  *
@@ -17,7 +17,7 @@ import { useSession } from '@/hooks/useSession';
 import { toDateStr } from '@/lib/utils/date';
 import { calcPregnancyWeek } from '@/lib/utils/pregnancy';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 export interface ResponseRow {
   submitted_at:    string;
@@ -41,7 +41,7 @@ interface UseHistoryReturn {
   error:         string | null;
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+// --- Hook ---------------------------------------------------------------------
 
 export function useHistory(patientId?: string): UseHistoryReturn {
   const { session, loading: sessionLoading } = useSession({ required: true });

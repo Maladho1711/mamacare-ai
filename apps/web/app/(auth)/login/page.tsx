@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [loadingRole, setLoadingRole] = useState<Role | null>(null);
   const [showOtp,     setShowOtp]     = useState(false);
 
-  // ── Connexion démo instantanée ───────────────────────────────────────────────
+  // -- Connexion démo instantanée -----------------------------------------------
   const handleDemoLogin = (role: Role) => {
     if (loadingRole) return;
     setLoadingRole(role);
@@ -32,7 +32,7 @@ export default function LoginPage() {
     router.replace(role === 'doctor' ? '/dashboard' : '/questionnaire');
   };
 
-  // ── Connexion OTP ────────────────────────────────────────────────────────────
+  // -- Connexion OTP ------------------------------------------------------------
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone.trim()) return;
@@ -51,7 +51,7 @@ export default function LoginPage() {
   return (
     <div className="space-y-4">
 
-      {/* ── Accès démo — toujours visible ── */}
+      {/* -- Accès démo — toujours visible -- */}
       {!showOtp && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
 
           <div className="px-4 pb-5 flex flex-col gap-3">
 
-            {/* ── Médecin ── */}
+            {/* -- Médecin -- */}
             <button
               type="button"
               onClick={() => handleDemoLogin('doctor')}
@@ -93,7 +93,7 @@ export default function LoginPage() {
               </span>
             </button>
 
-            {/* ── Patiente ── */}
+            {/* -- Patiente -- */}
             <button
               type="button"
               onClick={() => handleDemoLogin('patient')}
@@ -132,7 +132,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* ── Formulaire OTP (compte réel) ── */}
+      {/* -- Formulaire OTP (compte réel) -- */}
       {showOtp && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <button

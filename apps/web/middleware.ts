@@ -1,5 +1,5 @@
 /**
- * ─── Middleware Next.js — protection des routes ─────────────────────────────
+ * --- Middleware Next.js — protection des routes -----------------------------
  *
  * Lit le cookie `mc_session` (posé par la page login) et redirige selon le rôle.
  * Aucun appel réseau → rapide sur toutes les requêtes.
@@ -46,7 +46,7 @@ export function middleware(request: NextRequest) {
     : null;
   const session = parseSessionFromCookieHeader(cookieHeader);
 
-  // ── Route d'auth (/login, /verify) ────────────────────────────────────────
+  // -- Route d'auth (/login, /verify) ----------------------------------------
   if (isAuthRoute) {
     if (session) {
       const dest = session.role === 'doctor' ? '/dashboard' : '/questionnaire';
@@ -55,7 +55,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Route protégée ────────────────────────────────────────────────────────
+  // -- Route protégée --------------------------------------------------------
   if (!session) {
     return NextResponse.redirect(new URL('/login', request.url));
   }

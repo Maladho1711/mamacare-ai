@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── usePatient ────────────────────────────────────────────────────────────
+ * --- usePatient ------------------------------------------------------------
  *
  * Retourne les infos de la patiente connectée (calcul semaines / jours bébé).
  * En mode dev, le backend renvoie DEV_PATIENTS[0] via findByUserId().
@@ -16,7 +16,7 @@ import { useSession } from '@/hooks/useSession';
 import { apiClient } from '@/lib/api/client';
 import { calcPregnancyWeek, calcBabyDayOfLife } from '@/lib/utils/pregnancy';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 export interface PatientData {
   id:             string;
@@ -40,7 +40,7 @@ interface PatientApiResponse {
   status:         string;
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+// --- Hook ---------------------------------------------------------------------
 
 export function usePatient(): UsePatientReturn {
   const { session, loading: sessionLoading } = useSession({

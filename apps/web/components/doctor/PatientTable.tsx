@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import AlertBadge from './AlertBadge';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 export interface PatientRow {
   id: string;
@@ -20,7 +20,7 @@ interface PatientTableProps {
   patients: PatientRow[];
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function pregnancyWeek(start: string): number {
   return Math.max(0, Math.floor((Date.now() - new Date(start).getTime()) / 604_800_000));
@@ -40,7 +40,7 @@ function lastSeen(iso: string | null | undefined): string {
   return `Il y a ${diff} j`;
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function PatientTable({ patients }: PatientTableProps) {
   const router = useRouter();

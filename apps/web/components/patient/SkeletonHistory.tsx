@@ -1,4 +1,4 @@
-// ─── Skeleton historique patient ──────────────────────────────────────────────
+// --- Skeleton historique patient ----------------------------------------------
 
 import Skeleton from '@/components/ui/Skeleton';
 
@@ -6,13 +6,13 @@ export default function SkeletonHistory() {
   return (
     <div className="flex flex-col gap-6" aria-busy="true" aria-label="Chargement de l'historique">
 
-      {/* ── En-tête ── */}
+      {/* -- En-tête -- */}
       <div className="flex flex-col gap-1.5">
         <Skeleton className="w-36 h-6" rounded="md" />
         <Skeleton className="w-28 h-3" rounded="full" />
       </div>
 
-      {/* ── Légende ── */}
+      {/* -- Légende -- */}
       <div className="flex gap-4 flex-wrap">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex items-center gap-1.5">
@@ -22,7 +22,7 @@ export default function SkeletonHistory() {
         ))}
       </div>
 
-      {/* ── Grille calendrier 30 jours (7 colonnes) ── */}
+      {/* -- Grille calendrier 30 jours (7 colonnes) -- */}
       <div className="grid grid-cols-7 gap-1.5">
         {/* Entêtes jours de semaine */}
         {Array.from({ length: 7 }).map((_, i) => (
@@ -43,7 +43,7 @@ export default function SkeletonHistory() {
         ))}
       </div>
 
-      {/* ── Rappels grossesse ── */}
+      {/* -- Rappels grossesse -- */}
       <div className="rounded-xl p-4 flex flex-col gap-2" style={{ background: '#FDE8F3' }}>
         <Skeleton className="w-40 h-3" rounded="full" />
         <Skeleton className="w-full h-4" rounded="md" />

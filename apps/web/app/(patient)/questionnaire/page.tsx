@@ -7,7 +7,7 @@ import { apiClient } from '@/lib/api/client';
 import Spinner from '@/components/ui/Spinner';
 import { useOfflineQueue } from '@/hooks/useOfflineQueue';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type Choice   = { value: string; label: string };
 type Question = { id: string; text: string; choices: Choice[] };
@@ -16,7 +16,7 @@ type PageStatus = 'loading' | 'already-done' | 'form' | 'submitting' | 'error';
 interface TodayStatus  { submitted: boolean; alertLevel?: string }
 interface SubmitResult { alertLevel: string; explanation: string; triggeredRules: string[] }
 
-// ─── Questions (inline — bundle minimal) ─────────────────────────────────────
+// --- Questions (inline — bundle minimal) -------------------------------------
 
 const PREGNANCY_BASE: Question[] = [
   { id: 'Q1',  text: 'Avez-vous des maux de tête inhabituels ?',
@@ -70,7 +70,7 @@ function buildQuestions(pregnancyWeek: number, isFriday: boolean, status: string
   return qs;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 const LEVEL_COLORS: Record<string, string> = {
   green:  'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -85,7 +85,7 @@ function draftKey() {
   return `mamacare_draft_${new Date().toDateString()}`;
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function QuestionnairePage() {
   const router = useRouter();
@@ -100,7 +100,7 @@ export default function QuestionnairePage() {
   const [submitError, setSubmitError] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // ── Initialisation dans useEffect (pattern React correct) ─────────────────
+  // -- Initialisation dans useEffect (pattern React correct) -----------------
   useEffect(() => {
     if (loading || error || !patient) return;
 
@@ -195,7 +195,7 @@ export default function QuestionnairePage() {
     }
   }, [responses, patient, questions.length, router, isOnline, queueSubmission]);
 
-  // ── Rendus conditionnels ──────────────────────────────────────────────────
+  // -- Rendus conditionnels --------------------------------------------------
 
   if (loading || pageStatus === 'loading') {
     return (
@@ -271,7 +271,7 @@ export default function QuestionnairePage() {
     );
   }
 
-  // ── Écran de confirmation ────────────────────────────────────────────────
+  // -- Écran de confirmation ------------------------------------------------
   if (showConfirm) {
     const answeredQuestions = questions.filter((q) => responses[q.id]);
     return (
@@ -337,7 +337,7 @@ export default function QuestionnairePage() {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Bannière hors-ligne ── */}
+      {/* -- Bannière hors-ligne -- */}
       {!isOnline && (
         <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700 font-medium">
           <span aria-hidden="true">📵</span>

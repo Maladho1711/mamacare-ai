@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── NotificationSettings ───────────────────────────────────────────────────
+ * --- NotificationSettings ---------------------------------------------------
  *
  * Permet à la patiente d'activer/désactiver les rappels push quotidiens
  * et de choisir l'heure du rappel.
@@ -18,7 +18,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { apiClient } from '@/lib/api/client';
 import Button from '@/components/ui/Button';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface NotificationSettingsProps {
   /** Heure de rappel actuelle depuis le profil patiente, ex: "08:00" */
@@ -27,7 +27,7 @@ interface NotificationSettingsProps {
   onTimeChange?: (time: string) => void;
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function NotificationSettings({
   currentNotificationTime = '08:00',
@@ -50,7 +50,7 @@ export default function NotificationSettings({
   const [savingTime, setSavingTime] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // ─── Handlers ──────────────────────────────────────────────────────────────
+  // --- Handlers --------------------------------------------------------------
 
   async function handleToggle() {
     if (subscribed) {
@@ -93,7 +93,7 @@ export default function NotificationSettings({
     }
   }
 
-  // ─── Cas : navigateur non supporté ────────────────────────────────────────
+  // --- Cas : navigateur non supporté ----------------------------------------
 
   if (!supported) {
     return (
@@ -117,7 +117,7 @@ export default function NotificationSettings({
     );
   }
 
-  // ─── Cas : permission refusée (ne peut pas être réactivée programmatiquement) ──
+  // --- Cas : permission refusée (ne peut pas être réactivée programmatiquement) --
 
   if (permission === 'denied') {
     return (
@@ -143,7 +143,7 @@ export default function NotificationSettings({
     );
   }
 
-  // ─── Cas nominal ──────────────────────────────────────────────────────────
+  // --- Cas nominal ----------------------------------------------------------
 
   return (
     <section

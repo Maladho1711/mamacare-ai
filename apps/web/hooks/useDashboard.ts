@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── useDashboard ──────────────────────────────────────────────────────────
+ * --- useDashboard ----------------------------------------------------------
  *
  * Charge les patientes du médecin connecté via GET /patients.
  * Le backend gère automatiquement le mode dev (mocks) via isDevMode().
@@ -13,7 +13,7 @@ import { useSession } from '@/hooks/useSession';
 import { useRealtimeAlerts } from '@/hooks/useRealtimeAlerts';
 import { calcPregnancyWeek } from '@/lib/utils/pregnancy';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 /** Shape renvoyée par le backend (IPatient sérialisé). */
 interface ApiPatient {
@@ -61,7 +61,7 @@ interface UseDashboardReturn {
   lastUpdated: string | null;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 const RISK_ORDER: Record<string, number> = { red: 0, orange: 1, green: 2 };
 
@@ -92,7 +92,7 @@ function computeStats(patients: PatientRow[]): DashboardStats {
   };
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+// --- Hook ---------------------------------------------------------------------
 
 export function useDashboard(): UseDashboardReturn {
   const { session, loading: sessionLoading } = useSession({
@@ -146,7 +146,7 @@ export function useDashboard(): UseDashboardReturn {
   };
 }
 
-// ─── Re-exports utils (back-compat avec l'ancien hook) ──────────────────────
+// --- Re-exports utils (back-compat avec l'ancien hook) ----------------------
 
 export { calcPregnancyWeek };
 export { timeAgo, isToday } from '@/lib/utils/date';

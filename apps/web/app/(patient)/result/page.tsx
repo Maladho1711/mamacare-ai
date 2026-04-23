@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
 import Button from '@/components/ui/Button';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type AlertLevel = 'green' | 'orange' | 'red';
 
@@ -20,7 +20,7 @@ interface DoctorInfo {
   phone: string;
 }
 
-// ─── Config niveaux ───────────────────────────────────────────────────────────
+// --- Config niveaux -----------------------------------------------------------
 
 const LEVEL_CONFIG = {
   green: {
@@ -49,7 +49,7 @@ const LEVEL_CONFIG = {
   },
 } as const;
 
-// ─── Conseils contextuels ─────────────────────────────────────────────────────
+// --- Conseils contextuels -----------------------------------------------------
 
 const GREEN_TIPS = [
   { icon: '💧', label: 'Hydratation',   text: 'Buvez au moins 8 verres d\'eau par jour.' },
@@ -63,7 +63,7 @@ const ORANGE_TIPS = [
   { icon: '🚫', label: 'Ne pas…',      text: 'Ne prenez pas de médicaments sans avis médical.' },
 ];
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function ResultPage() {
   const router = useRouter();
@@ -95,7 +95,7 @@ export default function ResultPage() {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Carte résultat avec animation selon niveau ── */}
+      {/* -- Carte résultat avec animation selon niveau -- */}
       <div className={`rounded-2xl border-2 p-6 ${cfg.wrapper} ${cfg.cardAnimation}`}>
         <div className="flex items-center gap-3 mb-3">
           <span className="text-4xl" role="img" aria-label={cfg.label}>{cfg.icon}</span>
@@ -104,7 +104,7 @@ export default function ResultPage() {
         <p className={`text-sm leading-relaxed ${cfg.body}`}>{cfg.message}</p>
       </div>
 
-      {/* ── Explication Claude ── */}
+      {/* -- Explication Claude -- */}
       {result.explanation && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 animate-in">
           <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">
@@ -114,7 +114,7 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* ── Symptômes déclencheurs ── */}
+      {/* -- Symptômes déclencheurs -- */}
       {result.triggeredRules.length > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 animate-in">
           <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">
@@ -139,7 +139,7 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* ── Appel urgence (RED) ── */}
+      {/* -- Appel urgence (RED) -- */}
       {result.alertLevel === 'red' && (
         <div className="flex flex-col gap-3 animate-in">
           {/* Message rassurant */}
@@ -171,7 +171,7 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* ── Vigilance (ORANGE) — conseils enrichis ── */}
+      {/* -- Vigilance (ORANGE) — conseils enrichis -- */}
       {result.alertLevel === 'orange' && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-orange-100 dark:border-orange-900 shadow-sm p-5 animate-in">
           <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">
@@ -191,7 +191,7 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* ── Conseils (GREEN) — enrichis avec icônes ── */}
+      {/* -- Conseils (GREEN) — enrichis avec icônes -- */}
       {result.alertLevel === 'green' && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-emerald-100 dark:border-emerald-900 shadow-sm p-5 animate-in">
           <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">
@@ -211,7 +211,7 @@ export default function ResultPage() {
         </div>
       )}
 
-      {/* ── Navigation ── */}
+      {/* -- Navigation -- */}
       <div className="flex flex-col gap-2 mt-2">
         <Button variant="outline" fullWidth onClick={() => router.push('/history')}>
           Voir mon historique

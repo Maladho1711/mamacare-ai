@@ -8,7 +8,7 @@ import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
 import { useToast } from '@/components/ui/Toast';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface FormState {
   fullName: string;
@@ -41,7 +41,7 @@ function formatGuineanPhone(raw: string): string {
   return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`.trim();
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function NewPatientPage() {
   const router = useRouter();
@@ -259,7 +259,7 @@ export default function NewPatientPage() {
   );
 }
 
-// ─── Field wrapper ────────────────────────────────────────────────────────────
+// --- Field wrapper ------------------------------------------------------------
 
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (

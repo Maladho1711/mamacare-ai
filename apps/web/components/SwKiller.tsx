@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── SwKiller — tue les Service Workers fantômes en dev ─────────────────────
+ * --- SwKiller — tue les Service Workers fantômes en dev ---------------------
  *
  * Pourquoi ? next-pwa a été activé dans des sessions précédentes et a
  * installé un service worker dans le navigateur. Même après avoir désactivé

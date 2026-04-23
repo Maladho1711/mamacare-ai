@@ -11,13 +11,13 @@ import Button from '@/components/ui/Button';
 import FilterChip from '@/components/ui/FilterChip';
 import SkeletonDashboard from '@/components/doctor/SkeletonDashboard';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type ActiveFilter  = 'all' | 'red' | 'orange' | 'missed';
 type MissedDaysFilter = 2 | 3 | 7 | null;
 type TrimesterFilter  = 1 | 2 | 3 | null;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 /** Nombre de jours calendaires écoulés depuis le dernier check. */
 function calcDaysMissed(lastSubmittedAt: string | null): number {
@@ -64,7 +64,7 @@ function exportToCsv(rows: PatientRow[]): void {
   URL.revokeObjectURL(url);
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -81,7 +81,7 @@ export default function DashboardPage() {
     return <SkeletonDashboard />;
   }
 
-  // ── Application des filtres (cumulatifs) ──────────────────────────────────
+  // -- Application des filtres (cumulatifs) ----------------------------------
   const filtered: PatientRow[] = patients.filter((p) => {
     // Filtre principal (stat cards)
     if (filter === 'missed'  && isToday(p.last_submitted_at))  return false;
@@ -124,7 +124,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-5">
 
-        {/* ── Header + Quick actions ── */}
+        {/* -- Header + Quick actions -- */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        {/* ── Stats ── */}
+        {/* -- Stats -- */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard label="Total"           value={stats.total}  color="text-gray-800 dark:text-gray-100"   bg="bg-white dark:bg-gray-900" />
           <StatCard label="Urgences"        value={stats.red}    color="text-red-700 dark:text-red-400"     bg={filter === 'red'    ? 'bg-red-100 dark:bg-red-950'       : 'bg-red-50 dark:bg-red-950/60'}    active={filter === 'red'}    onClick={() => toggleFilter('red')} />
@@ -147,7 +147,7 @@ export default function DashboardPage() {
           <StatCard label="Sans check auj." value={stats.missed} color="text-gray-600 dark:text-gray-300"   bg={filter === 'missed' ? 'bg-gray-200 dark:bg-gray-800'     : 'bg-gray-100 dark:bg-gray-800/60'}  active={filter === 'missed'} onClick={() => toggleFilter('missed')} />
         </div>
 
-        {/* ── Filtres avancés ── */}
+        {/* -- Filtres avancés -- */}
         <div className="flex flex-col gap-3">
 
           {/* Jours manqués consécutifs */}
@@ -184,7 +184,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Résumé des filtres actifs ── */}
+        {/* -- Résumé des filtres actifs -- */}
         {hasActiveFilters && (
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-gray-500 dark:text-gray-400">Filtres actifs :</span>
@@ -217,7 +217,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── Table ── */}
+        {/* -- Table -- */}
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -259,7 +259,7 @@ export default function DashboardPage() {
   );
 }
 
-// ─── StatCard ─────────────────────────────────────────────────────────────────
+// --- StatCard -----------------------------------------------------------------
 
 function StatCard({
   label, value, color, bg, onClick, active,

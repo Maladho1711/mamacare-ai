@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── Page Alertes (médecin) ─────────────────────────────────────────────────
+ * --- Page Alertes (médecin) -------------------------------------------------
  *
  * Liste des alertes avec filtres, badges de comptage et cards redessinées.
  * Données via GET /alerts — backend renvoie les mocks en mode dev.
@@ -16,7 +16,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import FilterChip from '@/components/ui/FilterChip';
 import { useToast } from '@/components/ui/Toast';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface AlertApiRow {
   id:            string;
@@ -49,7 +49,7 @@ interface AlertItem {
 
 type FilterKey = 'all' | 'red' | 'orange' | 'resolved';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function timeAgo(iso: string): string {
   const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
@@ -100,7 +100,7 @@ function cardStyle(alert: AlertItem): string {
   return 'border-gray-100';
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
+// --- Skeleton -----------------------------------------------------------------
 
 function AlertSkeleton() {
   return (
@@ -123,7 +123,7 @@ function AlertSkeleton() {
   );
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function AlertsPage() {
   const router = useRouter();
@@ -188,7 +188,7 @@ export default function AlertsPage() {
     }
   };
 
-  // ── Rendu loading ────────────────────────────────────────────────────────
+  // -- Rendu loading --------------------------------------------------------
   if (loading || sessionLoading) {
     return (
       <div className="flex flex-col gap-4 max-w-2xl mx-auto">
@@ -206,12 +206,12 @@ export default function AlertsPage() {
     );
   }
 
-  // ── Comptages ─────────────────────────────────────────────────────────────
+  // -- Comptages -------------------------------------------------------------
   const urgencesCount   = alerts.filter((a) => !a.resolved_at && a.alert_type === 'red').length;
   const surveillerCount = alerts.filter((a) => !a.resolved_at && a.alert_type === 'orange').length;
   const resolvedCount   = alerts.filter((a) => !!a.resolved_at).length;
 
-  // ── Filtrage selon le chip actif ──────────────────────────────────────────
+  // -- Filtrage selon le chip actif ------------------------------------------
   const filteredAlerts: AlertItem[] = (() => {
     switch (filter) {
       case 'red':      return alerts.filter((a) => !a.resolved_at && a.alert_type === 'red');
@@ -224,7 +224,7 @@ export default function AlertsPage() {
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
 
-      {/* ── Entête ── */}
+      {/* -- Entête -- */}
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Alertes</h1>
@@ -252,7 +252,7 @@ export default function AlertsPage() {
         </div>
       </div>
 
-      {/* ── Filtres ── */}
+      {/* -- Filtres -- */}
       <div className="flex items-center gap-2 flex-wrap">
         <FilterChip
           active={filter === 'all'}
@@ -279,7 +279,7 @@ export default function AlertsPage() {
         />
       </div>
 
-      {/* ── Liste des alertes ── */}
+      {/* -- Liste des alertes -- */}
       {filteredAlerts.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
           <EmptyState
@@ -307,7 +307,7 @@ export default function AlertsPage() {
                   ${cardStyle(alert)}
                 `}
               >
-                {/* ── Ligne supérieure : badge + temps + bouton résoudre ── */}
+                {/* -- Ligne supérieure : badge + temps + bouton résoudre -- */}
                 <div className="flex items-start justify-between gap-3 px-4 pt-4">
                   <div className="flex items-center gap-2 flex-wrap">
                     <AlertBadge level={isResolved ? 'green' : alert.alert_type} />
@@ -333,7 +333,7 @@ export default function AlertsPage() {
                   )}
                 </div>
 
-                {/* ── Patiente ── */}
+                {/* -- Patiente -- */}
                 <div className="px-4 pt-2">
                   <button
                     type="button"
@@ -354,12 +354,12 @@ export default function AlertsPage() {
                   </button>
                 </div>
 
-                {/* ── Message ── */}
+                {/* -- Message -- */}
                 <p className="px-4 pt-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                   {alert.message}
                 </p>
 
-                {/* ── Pied : statut envoi + actions ── */}
+                {/* -- Pied : statut envoi + actions -- */}
                 <div className="px-4 pb-4 pt-3 flex items-center justify-between border-t border-gray-50 dark:border-gray-800 mt-3">
                   <span className={`text-xs font-medium ${delivery.className}`}>
                     {delivery.label}

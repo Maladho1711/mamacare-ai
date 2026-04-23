@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── usePushNotifications ───────────────────────────────────────────────────
+ * --- usePushNotifications ---------------------------------------------------
  *
  * Gère tout le cycle de vie des Push Notifications Web :
  *  1. Vérification du support navigateur
@@ -19,7 +19,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface PushState {
   /** Push API disponible dans ce navigateur */
@@ -36,7 +36,7 @@ interface VapidKeyResponse {
   publicKey: string;
 }
 
-// ─── Helper : convertit la clé VAPID base64url → Uint8Array ──────────────────
+// --- Helper : convertit la clé VAPID base64url → Uint8Array ------------------
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -45,7 +45,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
 }
 
-// ─── Helper : calcule le délai en ms jusqu'à l'heure "HH:MM" ─────────────────
+// --- Helper : calcule le délai en ms jusqu'à l'heure "HH:MM" -----------------
 // Si l'heure est déjà passée, programme pour le lendemain.
 
 function msUntilTime(timeStr: string): number {
@@ -59,7 +59,7 @@ function msUntilTime(timeStr: string): number {
   return target.getTime() - now.getTime();
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+// --- Hook ---------------------------------------------------------------------
 
 export function usePushNotifications() {
   const [state, setState] = useState<PushState>({
@@ -100,7 +100,7 @@ export function usePushNotifications() {
     }
   }, []);
 
-  // ─── subscribe ─────────────────────────────────────────────────────────────
+  // --- subscribe -------------------------------------------------------------
 
   const subscribe = useCallback(async (): Promise<boolean> => {
     if (!state.supported) return false;
@@ -159,7 +159,7 @@ export function usePushNotifications() {
     }
   }, [state.supported]);
 
-  // ─── unsubscribe ───────────────────────────────────────────────────────────
+  // --- unsubscribe -----------------------------------------------------------
 
   const unsubscribe = useCallback(async (): Promise<void> => {
     if (!state.supported) return;
@@ -188,7 +188,7 @@ export function usePushNotifications() {
     }
   }, [state.supported]);
 
-  // ─── scheduleLocalReminder ─────────────────────────────────────────────────
+  // --- scheduleLocalReminder -------------------------------------------------
 
   const scheduleLocalReminder = useCallback(
     async (timeStr: string): Promise<void> => {

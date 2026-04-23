@@ -1,4 +1,4 @@
-// ─── Skeleton liste des patientes ────────────────────────────────────────────
+// --- Skeleton liste des patientes --------------------------------------------
 
 import Skeleton from '@/components/ui/Skeleton';
 
@@ -6,16 +6,16 @@ export default function SkeletonPatientList() {
   return (
     <div className="flex flex-col gap-4" aria-busy="true" aria-label="Chargement des patientes">
 
-      {/* ── En-tête ── */}
+      {/* -- En-tête -- */}
       <div className="flex items-center justify-between">
         <Skeleton className="w-28 h-6" rounded="md" />
         <Skeleton className="w-24 h-9" rounded="lg" />
       </div>
 
-      {/* ── Barre de recherche ── */}
+      {/* -- Barre de recherche -- */}
       <Skeleton className="w-full h-12" rounded="xl" />
 
-      {/* ── Filtres statut + tri ── */}
+      {/* -- Filtres statut + tri -- */}
       <div className="flex flex-wrap gap-2">
         <Skeleton className="w-16 h-7" rounded="full" />
         <Skeleton className="w-24 h-7" rounded="full" />
@@ -24,7 +24,7 @@ export default function SkeletonPatientList() {
         <Skeleton className="w-28 h-7" rounded="full" />
       </div>
 
-      {/* ── Filtres avancés ── */}
+      {/* -- Filtres avancés -- */}
       <div className="flex flex-col gap-2.5">
         <div className="flex items-center gap-2">
           <Skeleton className="w-16 h-3" rounded="full" />
@@ -40,13 +40,13 @@ export default function SkeletonPatientList() {
         </div>
       </div>
 
-      {/* ── Compteur + export ── */}
+      {/* -- Compteur + export -- */}
       <div className="flex items-center justify-between">
         <Skeleton className="w-24 h-3" rounded="full" />
         <Skeleton className="w-24 h-3" rounded="full" />
       </div>
 
-      {/* ── Tableau : 6 lignes ── */}
+      {/* -- Tableau : 6 lignes -- */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {Array.from({ length: 6 }).map((_, i) => (
           <div

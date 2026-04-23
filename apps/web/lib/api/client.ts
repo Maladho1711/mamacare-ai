@@ -1,5 +1,5 @@
 /**
- * ─── API Client — source unique des appels HTTP ─────────────────────────────
+ * --- API Client — source unique des appels HTTP -----------------------------
  *
  * Attache automatiquement le token depuis le cookie `mc_session`.
  * Aucun composant ne doit passer le token manuellement.
@@ -37,7 +37,7 @@ async function apiFetch<T>(
   path: string,
   options: ApiFetchOptions = {},
 ): Promise<T> {
-  // ── Mode démo : retourner les données mockées sans appel réseau ────────────
+  // -- Mode démo : retourner les données mockées sans appel réseau ------------
   if (isDemoMode()) {
     return getDemoResponse<T>(path, options.method ?? 'GET');
   }

@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── Page Profil Médecin ──────────────────────────────────────────────────────
+ * --- Page Profil Médecin ------------------------------------------------------
  *
  * Affiche les informations du médecin connecté, ses statistiques et les
  * actions disponibles (édition, notifications, export CSV, déconnexion).
@@ -25,7 +25,7 @@ import {
   ClipboardIcon,
 } from '@/components/icons';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface ProfileStats {
   activePatients:   number;
@@ -42,7 +42,7 @@ interface PatientApiRow {
   id: string;
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
+// --- Skeleton -----------------------------------------------------------------
 
 function ProfileSkeleton() {
   return (
@@ -83,7 +83,7 @@ function ProfileSkeleton() {
   );
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -95,7 +95,7 @@ export default function ProfilePage() {
   const [stats,   setStats]   = useState<ProfileStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ── Charger les stats depuis les endpoints existants ─────────────────────
+  // -- Charger les stats depuis les endpoints existants ---------------------
   useEffect(() => {
     if (sessionLoading || !session) return;
     let cancelled = false;
@@ -146,7 +146,7 @@ export default function ProfilePage() {
     router.replace('/login');
   };
 
-  // ── Rendu loading ────────────────────────────────────────────────────────
+  // -- Rendu loading --------------------------------------------------------
   if (loading || sessionLoading) {
     return (
       <div className="max-w-lg mx-auto">
@@ -164,7 +164,7 @@ export default function ProfilePage() {
         .toUpperCase()
     : 'DR';
 
-  // ── Paramètres — liens avec TODO flows ──────────────────────────────────
+  // -- Paramètres — liens avec TODO flows ----------------------------------
   const settingsItems: Array<{
     icon: React.ReactNode;
     label: string;
@@ -202,7 +202,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-4">
 
-      {/* ── Bouton retour ── */}
+      {/* -- Bouton retour -- */}
       <button
         type="button"
         onClick={() => router.back()}
@@ -212,7 +212,7 @@ export default function ProfilePage() {
         Retour
       </button>
 
-      {/* ── Carte identité ── */}
+      {/* -- Carte identité -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 animate-in">
         <div className="flex items-center gap-4">
           {/* Avatar avec initiales */}
@@ -235,7 +235,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── Statistiques ── */}
+      {/* -- Statistiques -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 animate-in">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <SettingsIcon size={14} />
@@ -282,7 +282,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      {/* ── Paramètres ── */}
+      {/* -- Paramètres -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in">
         <div className="px-5 pt-4 pb-2">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -319,7 +319,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── Déconnexion ── */}
+      {/* -- Déconnexion -- */}
       <button
         type="button"
         onClick={handleLogout}

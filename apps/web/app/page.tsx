@@ -9,7 +9,7 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero Section ───────────────────────────────────────────────────── */}
+      {/* -- Hero Section ----------------------------------------------------- */}
       <header className="bg-gradient-to-br from-pink-50 via-white to-pink-50">
         <nav className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -65,7 +65,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── Stats Section ──────────────────────────────────────────────────── */}
+      {/* -- Stats Section ---------------------------------------------------- */}
       <section className="bg-[#E91E8C] py-12">
         <div className="max-w-6xl mx-auto px-4">
           <ScrollReveal>
@@ -87,7 +87,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Problème ──────────────────────────────────────────────────────── */}
+      {/* -- Problème -------------------------------------------------------- */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <ScrollReveal>
@@ -143,7 +143,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Comment ça marche ─────────────────────────────────────────────── */}
+      {/* -- Comment ça marche ----------------------------------------------- */}
       <section id="fonctionnement" className="py-16 md:py-24">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -196,7 +196,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Pour qui ? ─────────────────────────────────────────────────────── */}
+      {/* -- Pour qui ? ------------------------------------------------------- */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -259,7 +259,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Technologie ────────────────────────────────────────────────────── */}
+      {/* -- Technologie ------------------------------------------------------ */}
       <section className="py-16 md:py-24">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -292,7 +292,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FAQ ───────────────────────────────────────────────────────────── */}
+      {/* -- FAQ ------------------------------------------------------------- */}
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-10">
@@ -334,7 +334,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA Final ──────────────────────────────────────────────────────── */}
+      {/* -- CTA Final -------------------------------------------------------- */}
       <section className="py-16 md:py-24 bg-gradient-to-br from-[#E91E8C] to-[#A81266]">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white">
@@ -355,7 +355,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
+      {/* -- Footer ----------------------------------------------------------- */}
       <footer className="py-8 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">

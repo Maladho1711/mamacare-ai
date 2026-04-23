@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── Système Toast global ────────────────────────────────────────────────────
+ * --- Système Toast global ----------------------------------------------------
  *
  * Usage :
  *   const { showToast } = useToast();
@@ -30,7 +30,7 @@ import {
   type ReactNode,
 } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -48,7 +48,7 @@ interface ToastContextValue {
   toast:        (message: string, type?: ToastType) => void;
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
+// --- Context ------------------------------------------------------------------
 
 const ToastContext = createContext<ToastContextValue>({
   showToast:    () => {},
@@ -56,13 +56,13 @@ const ToastContext = createContext<ToastContextValue>({
   toast:        () => {},
 });
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+// --- Hook ---------------------------------------------------------------------
 
 export function useToast(): ToastContextValue {
   return useContext(ToastContext);
 }
 
-// ─── Durées par défaut ────────────────────────────────────────────────────────
+// --- Durées par défaut --------------------------------------------------------
 
 const DEFAULT_DURATION: Record<ToastType, number> = {
   success: 3000,
@@ -71,7 +71,7 @@ const DEFAULT_DURATION: Record<ToastType, number> = {
   error:   5000,
 };
 
-// ─── Design tokens par type ───────────────────────────────────────────────────
+// --- Design tokens par type ---------------------------------------------------
 
 const TOAST_STYLES: Record<ToastType, { bg: string; icon: string }> = {
   success: {
@@ -92,7 +92,7 @@ const TOAST_STYLES: Record<ToastType, { bg: string; icon: string }> = {
   },
 };
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+// --- Provider -----------------------------------------------------------------
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -130,7 +130,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ showToast, dismissToast, toast }}>
       {children}
 
-      {/* ── Conteneur mobile : bas-centre ── */}
+      {/* -- Conteneur mobile : bas-centre -- */}
       <div
         aria-live="polite"
         aria-atomic="false"
@@ -147,7 +147,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         ))}
       </div>
 
-      {/* ── Conteneur desktop : haut-droite ── */}
+      {/* -- Conteneur desktop : haut-droite -- */}
       <div
         aria-live="polite"
         aria-atomic="false"
@@ -166,7 +166,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ─── Carte toast individuelle ─────────────────────────────────────────────────
+// --- Carte toast individuelle -------------------------------------------------
 
 interface ToastCardProps {
   item:      ToastItem;

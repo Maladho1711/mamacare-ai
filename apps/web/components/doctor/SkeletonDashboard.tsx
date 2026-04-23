@@ -1,4 +1,4 @@
-// ─── Skeleton Dashboard médecin ──────────────────────────────────────────────
+// --- Skeleton Dashboard médecin ----------------------------------------------
 // Reproduit visuellement la structure du dashboard pendant le chargement.
 
 import Skeleton from '@/components/ui/Skeleton';
@@ -7,7 +7,7 @@ export default function SkeletonDashboard() {
   return (
     <div className="flex flex-col gap-5" aria-busy="true" aria-label="Chargement du dashboard">
 
-      {/* ── Header : titre + bouton ── */}
+      {/* -- Header : titre + bouton -- */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1.5">
           <Skeleton className="w-32 h-6" rounded="md" />
@@ -16,7 +16,7 @@ export default function SkeletonDashboard() {
         <Skeleton className="w-24 h-9" rounded="xl" />
       </div>
 
-      {/* ── 4 stat cards ── */}
+      {/* -- 4 stat cards -- */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
@@ -29,7 +29,7 @@ export default function SkeletonDashboard() {
         ))}
       </div>
 
-      {/* ── Filtres : 2 lignes de chips ── */}
+      {/* -- Filtres : 2 lignes de chips -- */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Skeleton className="w-16 h-3" rounded="full" />
@@ -45,7 +45,7 @@ export default function SkeletonDashboard() {
         </div>
       </div>
 
-      {/* ── Tableau : 5 lignes ── */}
+      {/* -- Tableau : 5 lignes -- */}
       <section>
         <div className="flex items-center justify-between mb-3">
           <Skeleton className="w-40 h-4" rounded="md" />

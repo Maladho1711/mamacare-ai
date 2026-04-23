@@ -1,4 +1,4 @@
-// ─── Skeleton — composant générique animé ────────────────────────────────────
+// --- Skeleton — composant générique animé ------------------------------------
 // Usage :
 //   <Skeleton className="w-full h-4" />                  → barre
 //   <Skeleton className="w-10 h-10" rounded="full" />    → cercle avatar

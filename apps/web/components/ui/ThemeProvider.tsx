@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -19,11 +19,11 @@ interface ThemeContextValue {
   isDark: boolean;
 }
 
-// ─── Constante ────────────────────────────────────────────────────────────────
+// --- Constante ----------------------------------------------------------------
 
 const STORAGE_KEY = 'mamacare-theme';
 
-// ─── Script anti-flash (injecté dans <head> côté serveur) ─────────────────────
+// --- Script anti-flash (injecté dans <head> côté serveur) ---------------------
 // Ce script s'exécute avant le premier paint et applique la classe dark immédiatement.
 
 export const themeScript = `
@@ -38,7 +38,7 @@ export const themeScript = `
 })();
 `.trim();
 
-// ─── Contexte ────────────────────────────────────────────────────────────────
+// --- Contexte ----------------------------------------------------------------
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: 'system',
@@ -46,7 +46,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   isDark: false,
 });
 
-// ─── Provider ────────────────────────────────────────────────────────────────
+// --- Provider ----------------------------------------------------------------
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('system');
@@ -115,7 +115,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+// --- Hook ---------------------------------------------------------------------
 
 export function useTheme(): ThemeContextValue {
   return useContext(ThemeContext);

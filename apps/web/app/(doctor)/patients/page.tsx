@@ -9,7 +9,7 @@ import PatientTable, { type PatientRow } from '@/components/doctor/PatientTable'
 import FilterChip from '@/components/ui/FilterChip';
 import SkeletonPatientList from '@/components/doctor/SkeletonPatientList';
 
-// ─── Types API ────────────────────────────────────────────────────────────────
+// --- Types API ----------------------------------------------------------------
 
 interface PatientApi {
   id:              string;
@@ -36,14 +36,14 @@ function mapPatient(p: PatientApi): PatientRow {
   };
 }
 
-// ─── Types filtres ────────────────────────────────────────────────────────────
+// --- Types filtres ------------------------------------------------------------
 
 type SortKey       = 'risk' | 'name' | 'recent';
 type StatusFilter  = 'all' | 'pregnant' | 'postnatal';
 type MissedDaysFilter = 2 | 3 | 7 | null;
 type TrimesterFilter  = 1 | 2 | 3 | null;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 const RISK_ORDER: Record<string, number> = { red: 0, orange: 1, green: 2 };
 
@@ -94,7 +94,7 @@ function exportToCsv(rows: PatientRow[]): void {
   URL.revokeObjectURL(url);
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function PatientsPage() {
   const router = useRouter();
@@ -148,7 +148,7 @@ export default function PatientsPage() {
     );
   }
 
-  // ── Application des filtres ───────────────────────────────────────────────
+  // -- Application des filtres -----------------------------------------------
   let visible = patients;
 
   if (statusFilter !== 'all') {
@@ -172,7 +172,7 @@ export default function PatientsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* ── En-tête ── */}
+      {/* -- En-tête -- */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Patientes</h1>
         <button
@@ -183,7 +183,7 @@ export default function PatientsPage() {
         </button>
       </div>
 
-      {/* ── Barre de recherche ── */}
+      {/* -- Barre de recherche -- */}
       <input
         type="search"
         placeholder="Rechercher par nom ou téléphone…"
@@ -193,7 +193,7 @@ export default function PatientsPage() {
           placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#E91E8C] transition-shadow"
       />
 
-      {/* ── Filtres statut + tri ── */}
+      {/* -- Filtres statut + tri -- */}
       <div className="flex flex-wrap gap-2">
         {(['all', 'pregnant', 'postnatal'] as const).map((s) => (
           <button
@@ -221,7 +221,7 @@ export default function PatientsPage() {
         </select>
       </div>
 
-      {/* ── Filtres avancés ── */}
+      {/* -- Filtres avancés -- */}
       <div className="flex flex-col gap-2.5">
         {/* Jours manqués */}
         <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
@@ -245,7 +245,7 @@ export default function PatientsPage() {
         </div>
       </div>
 
-      {/* ── Résumé filtres avancés actifs ── */}
+      {/* -- Résumé filtres avancés actifs -- */}
       {hasAdvancedFilters && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-gray-500 dark:text-gray-400">Filtres :</span>
@@ -268,7 +268,7 @@ export default function PatientsPage() {
         </div>
       )}
 
-      {/* ── Compteur + export CSV ── */}
+      {/* -- Compteur + export CSV -- */}
       <div className="flex items-center justify-between">
         <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
           {visible.length} patiente{visible.length !== 1 ? 's' : ''}

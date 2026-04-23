@@ -1,5 +1,5 @@
 /**
- * ─── Données de démonstration MamaCare ────────────────────────────────────
+ * --- Données de démonstration MamaCare ------------------------------------
  *
  * Toutes les données sont réalistes et en français guinéen.
  * Les dates sont calculées dynamiquement pour toujours être cohérentes.
@@ -25,7 +25,7 @@ function expectedTermFromSA(sa: number): string {
   return daysFromNow((40 - sa) * 7);
 }
 
-// ─── Médecin démo ─────────────────────────────────────────────────────────────
+// --- Médecin démo -------------------------------------------------------------
 
 export const DEMO_DOCTOR = {
   id:       'demo-doctor-1',
@@ -34,7 +34,7 @@ export const DEMO_DOCTOR = {
   role:     'doctor' as const,
 };
 
-// ─── Patiente démo (connectée côté patient) ───────────────────────────────────
+// --- Patiente démo (connectée côté patient) -----------------------------------
 
 export const DEMO_PATIENT_SELF = {
   id:              'demo-patient-self',
@@ -51,7 +51,7 @@ export const DEMO_PATIENT_SELF = {
   updatedAt:       daysAgo(0),
 };
 
-// ─── Liste patientes (vue médecin) ────────────────────────────────────────────
+// --- Liste patientes (vue médecin) --------------------------------------------
 
 export const DEMO_PATIENTS = [
   {
@@ -116,7 +116,7 @@ export const DEMO_PATIENTS = [
   },
 ];
 
-// ─── Alertes (vue médecin) ────────────────────────────────────────────────────
+// --- Alertes (vue médecin) ----------------------------------------------------
 
 export const DEMO_ALERTS = [
   {
@@ -151,7 +151,7 @@ export const DEMO_ALERTS = [
   },
 ];
 
-// ─── Historique questionnaire (30 jours) ─────────────────────────────────────
+// --- Historique questionnaire (30 jours) -------------------------------------
 
 function historyEntry(
   daysBack: number,

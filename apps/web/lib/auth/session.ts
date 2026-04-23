@@ -1,5 +1,5 @@
 /**
- * ─── Session management — source unique frontend ─────────────────────────────
+ * --- Session management — source unique frontend -----------------------------
  *
  * Deux couches :
  * 1. Cookie `mc_token`  — JWT, HttpOnly, posé par le backend — protégé XSS
@@ -23,7 +23,7 @@ export interface Session {
 const COOKIE_NAME    = 'mc_session';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 jours en secondes
 
-// ─── Client-side (browser) ────────────────────────────────────────────────────
+// --- Client-side (browser) ----------------------------------------------------
 
 export function saveSession(session: Session): void {
   if (typeof document === 'undefined') return;
@@ -54,7 +54,7 @@ export function clearSession(): void {
   void fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
 }
 
-// ─── Server-side (middleware / Server Components) ───────────────────────────
+// --- Server-side (middleware / Server Components) ---------------------------
 
 export function parseSessionFromCookieHeader(
   cookieHeader: string | null | undefined,

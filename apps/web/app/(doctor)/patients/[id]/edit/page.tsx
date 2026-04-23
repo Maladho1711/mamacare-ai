@@ -18,7 +18,7 @@ interface PatientApi {
   notes?:          string;
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface FormState {
   fullName:        string;
@@ -29,7 +29,7 @@ interface FormState {
   notes:           string;
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function EditPatientPage() {
   const router    = useRouter();
@@ -241,7 +241,7 @@ export default function EditPatientPage() {
           </Button>
         </form>
 
-        {/* ── Zone désactivation (F08) ── */}
+        {/* -- Zone désactivation (F08) -- */}
         {form.status !== 'completed' && (
           <div className="mt-8 border-t border-gray-200 pt-6">
             <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-3">
@@ -293,7 +293,7 @@ export default function EditPatientPage() {
   );
 }
 
-// ─── Helpers UI ───────────────────────────────────────────────────────────────
+// --- Helpers UI ---------------------------------------------------------------
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

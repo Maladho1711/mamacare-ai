@@ -1,4 +1,4 @@
-// ─── Skeleton fiche patiente ──────────────────────────────────────────────────
+// --- Skeleton fiche patiente --------------------------------------------------
 
 import Skeleton from '@/components/ui/Skeleton';
 
@@ -6,7 +6,7 @@ export default function SkeletonPatientDetail() {
   return (
     <div className="flex flex-col gap-5" aria-busy="true" aria-label="Chargement de la patiente">
 
-      {/* ── Card en-tête : back + titre + badge ── */}
+      {/* -- Card en-tête : back + titre + badge -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Skeleton className="w-14 h-4" rounded="full" />
@@ -18,7 +18,7 @@ export default function SkeletonPatientDetail() {
         </div>
       </div>
 
-      {/* ── Card identité : grille 2x2 + notes ── */}
+      {/* -- Card identité : grille 2x2 + notes -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -38,13 +38,13 @@ export default function SkeletonPatientDetail() {
         <Skeleton className="w-full h-10" rounded="xl" />
       </div>
 
-      {/* ── Résumé IA ── */}
+      {/* -- Résumé IA -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
         <Skeleton className="w-40 h-3" rounded="full" />
         <Skeleton className="w-full h-12" rounded="xl" />
       </div>
 
-      {/* ── Graphique évolution 30 jours ── */}
+      {/* -- Graphique évolution 30 jours -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <Skeleton className="w-36 h-3" rounded="full" />
@@ -58,7 +58,7 @@ export default function SkeletonPatientDetail() {
         </div>
       </div>
 
-      {/* ── Calendrier 30 jours ── */}
+      {/* -- Calendrier 30 jours -- */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4">
         <Skeleton className="w-28 h-3" rounded="full" />
         {/* Entêtes jours */}

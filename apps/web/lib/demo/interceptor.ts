@@ -1,5 +1,5 @@
 /**
- * ─── Intercepteur API — Mode Démo ────────────────────────────────────────────
+ * --- Intercepteur API — Mode Démo --------------------------------------------
  *
  * Intercepte tous les appels `apiClient` quand NEXT_PUBLIC_DEMO_MODE=true.
  * Retourne des données mockées cohérentes sans aucun appel réseau.
@@ -35,22 +35,22 @@ type AlertState = Omit<(typeof DEMO_ALERTS)[number], 'resolved_at'> & { resolved
 let alertsState: AlertState[] = DEMO_ALERTS.map((a) => ({ ...a }));
 
 export function getDemoResponse<T>(path: string, method: string): T {
-  // ── GET /patients ────────────────────────────────────────────────────────
+  // -- GET /patients --------------------------------------------------------
   if (method === 'GET' && path === '/patients') {
     return DEMO_PATIENTS as unknown as T;
   }
 
-  // ── GET /patients/me ─────────────────────────────────────────────────────
+  // -- GET /patients/me -----------------------------------------------------
   if (method === 'GET' && path === '/patients/me') {
     return DEMO_PATIENT_SELF as unknown as T;
   }
 
-  // ── GET /patients/me/doctor ──────────────────────────────────────────────
+  // -- GET /patients/me/doctor ----------------------------------------------
   if (method === 'GET' && path === '/patients/me/doctor') {
     return { fullName: 'Dr. Maladho Barry', phone: DEMO_DOCTOR.phone } as unknown as T;
   }
 
-  // ── GET /patients/:id ────────────────────────────────────────────────────
+  // -- GET /patients/:id ----------------------------------------------------
   const patientMatch = path.match(/^\/patients\/([^/]+)$/);
   if (method === 'GET' && patientMatch) {
     const id = patientMatch[1];
@@ -60,7 +60,7 @@ export function getDemoResponse<T>(path: string, method: string): T {
     return patient as unknown as T;
   }
 
-  // ── POST /patients ───────────────────────────────────────────────────────
+  // -- POST /patients -------------------------------------------------------
   if (method === 'POST' && path === '/patients') {
     return {
       id:          `demo-patient-new-${Date.now()}`,
@@ -75,26 +75,26 @@ export function getDemoResponse<T>(path: string, method: string): T {
     } as unknown as T;
   }
 
-  // ── PATCH /patients/:id ─────────────────────────────────────────────────
+  // -- PATCH /patients/:id -------------------------------------------------
   if (method === 'PATCH' && patientMatch) {
     const id = patientMatch[1];
     const patient = DEMO_PATIENTS.find((p) => p.id === id) ?? DEMO_PATIENTS[0]!;
     return { ...patient, updatedAt: new Date().toISOString() } as unknown as T;
   }
 
-  // ── PATCH /patients/:id/archive ─────────────────────────────────────────
+  // -- PATCH /patients/:id/archive -----------------------------------------
   const patientArchiveMatch = path.match(/^\/patients\/([^/]+)\/archive$/);
   if (method === 'PATCH' && patientArchiveMatch) {
     return {} as T;
   }
 
-  // ── PATCH /patients/:id/reactivate ──────────────────────────────────────
+  // -- PATCH /patients/:id/reactivate --------------------------------------
   const patientReactivateMatch = path.match(/^\/patients\/([^/]+)\/reactivate$/);
   if (method === 'PATCH' && patientReactivateMatch) {
     return {} as T;
   }
 
-  // ── GET /patients/:id/summary ────────────────────────────────────────────
+  // -- GET /patients/:id/summary --------------------------------------------
   const patientSummaryMatch = path.match(/^\/patients\/([^/]+)\/summary$/);
   if (method === 'GET' && patientSummaryMatch) {
     return {
@@ -104,12 +104,12 @@ export function getDemoResponse<T>(path: string, method: string): T {
     } as unknown as T;
   }
 
-  // ── GET /alerts ──────────────────────────────────────────────────────────
+  // -- GET /alerts ----------------------------------------------------------
   if (method === 'GET' && path === '/alerts') {
     return alertsState as unknown as T;
   }
 
-  // ── PATCH /alerts/:id/resolve ────────────────────────────────────────────
+  // -- PATCH /alerts/:id/resolve --------------------------------------------
   const alertResolveMatch = path.match(/^\/alerts\/([^/]+)\/resolve$/);
   if (method === 'PATCH' && alertResolveMatch) {
     const id = alertResolveMatch[1];
@@ -119,22 +119,22 @@ export function getDemoResponse<T>(path: string, method: string): T {
     return {} as T;
   }
 
-  // ── GET /questionnaire/my-history ────────────────────────────────────────
+  // -- GET /questionnaire/my-history ----------------------------------------
   if (method === 'GET' && path === '/questionnaire/my-history') {
     return DEMO_HISTORY_PATIENT as unknown as T;
   }
 
-  // ── GET /questionnaire/history/:id ──────────────────────────────────────
+  // -- GET /questionnaire/history/:id --------------------------------------
   if (method === 'GET' && /^\/questionnaire\/history\/[^/]+$/.test(path)) {
     return DEMO_HISTORY_DOCTOR as unknown as T;
   }
 
-  // ── GET /questionnaire/today ─────────────────────────────────────────────
+  // -- GET /questionnaire/today ---------------------------------------------
   if (method === 'GET' && path === '/questionnaire/today') {
     return { submitted: false } as unknown as T;
   }
 
-  // ── POST /questionnaire/submit ───────────────────────────────────────────
+  // -- POST /questionnaire/submit -------------------------------------------
   if (method === 'POST' && path === '/questionnaire/submit') {
     return {
       alertLevel:     'green',
@@ -143,7 +143,7 @@ export function getDemoResponse<T>(path: string, method: string): T {
     } as unknown as T;
   }
 
-  // ── GET /auth/me ─────────────────────────────────────────────────────────
+  // -- GET /auth/me ---------------------------------------------------------
   if (method === 'GET' && path === '/auth/me') {
     return {
       id:       DEMO_PATIENT_SELF.id,
@@ -153,7 +153,7 @@ export function getDemoResponse<T>(path: string, method: string): T {
     } as unknown as T;
   }
 
-  // ── Fallback : tout autre endpoint → objet vide sans erreur ─────────────
+  // -- Fallback : tout autre endpoint → objet vide sans erreur -------------
   return {} as T;
 }
 

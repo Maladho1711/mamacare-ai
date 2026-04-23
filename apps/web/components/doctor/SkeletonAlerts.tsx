@@ -1,4 +1,4 @@
-// ─── Skeleton page Alertes ────────────────────────────────────────────────────
+// --- Skeleton page Alertes ----------------------------------------------------
 
 import Skeleton from '@/components/ui/Skeleton';
 
@@ -6,13 +6,13 @@ export default function SkeletonAlerts() {
   return (
     <div className="flex flex-col gap-4" aria-busy="true" aria-label="Chargement des alertes">
 
-      {/* ── En-tête ── */}
+      {/* -- En-tête -- */}
       <div className="flex flex-col gap-1">
         <Skeleton className="w-20 h-6" rounded="md" />
         <Skeleton className="w-32 h-3" rounded="full" />
       </div>
 
-      {/* ── 4 cartes d'alerte ── */}
+      {/* -- 4 cartes d'alerte -- */}
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}

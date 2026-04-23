@@ -10,7 +10,7 @@ import Modal from '@/components/ui/Modal';
 import SkeletonPatientDetail from '@/components/doctor/SkeletonPatientDetail';
 import { useToast } from '@/components/ui/Toast';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// --- Types --------------------------------------------------------------------
 
 interface PatientApi {
   id:              string;
@@ -76,7 +76,7 @@ interface AiSummary {
   cached: boolean;
 }
 
-// ─── Constantes archivage ─────────────────────────────────────────────────────
+// --- Constantes archivage -----------------------------------------------------
 
 const ARCHIVE_REASONS = [
   'Accouchement',
@@ -86,7 +86,7 @@ const ARCHIVE_REASONS = [
   'Autre',
 ] as const;
 
-// ─── Constantes visuelles ─────────────────────────────────────────────────────
+// --- Constantes visuelles -----------------------------------------------------
 
 const LEVEL_DOT: Record<string, string> = {
   green:  'bg-emerald-400',
@@ -107,7 +107,7 @@ const DETAIL_CARD: Record<string, string> = {
   red:    'bg-red-50      border-red-300',
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// --- Helpers ------------------------------------------------------------------
 
 function toDateStr(d: Date): string {
   return d.toISOString().split('T')[0] ?? '';
@@ -153,7 +153,7 @@ function buildGrid(history: HistoryEntry[]): GridCell[] {
   });
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function PatientDetailPage() {
   const router    = useRouter();
@@ -173,13 +173,13 @@ export default function PatientDetailPage() {
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null);
   const [updatingRisk,  setUpdatingRisk]  = useState(false);
 
-  // ── Notes inline editing ──
+  // -- Notes inline editing --
   const [notesEditing,  setNotesEditing]  = useState(false);
   const [notesDraft,    setNotesDraft]    = useState<string>('');
   const [notesSaving,   setNotesSaving]   = useState(false);
   const [notesError,    setNotesError]    = useState<string | null>(null);
 
-  // ── Feature 2.2 — Archivage ──
+  // -- Feature 2.2 — Archivage --
   const [archiveModalOpen,   setArchiveModalOpen]   = useState(false);
   const [archiveReason,      setArchiveReason]      = useState<string>(ARCHIVE_REASONS[0]);
   const [archiving,          setArchiving]          = useState(false);
@@ -187,7 +187,7 @@ export default function PatientDetailPage() {
   const [reactivating,       setReactivating]       = useState(false);
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
-  // ── Feature 3.2 — Résumé IA ──
+  // -- Feature 3.2 — Résumé IA --
   const [summary,        setSummary]        = useState<AiSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryError,   setSummaryError]   = useState<string>('');
@@ -275,7 +275,7 @@ export default function PatientDetailPage() {
     setUpdatingRisk(false);
   }
 
-  // ── Feature 2.2 — Handlers archivage ──
+  // -- Feature 2.2 — Handlers archivage --
 
   function openArchiveModal() {
     setArchiveReason(ARCHIVE_REASONS[0]);
@@ -322,7 +322,7 @@ export default function PatientDetailPage() {
     }
   }
 
-  // ── Feature 3.2 — Résumé IA ──
+  // -- Feature 3.2 — Résumé IA --
 
   async function loadSummary() {
     if (!patient || summaryLoading) return;
@@ -340,7 +340,7 @@ export default function PatientDetailPage() {
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // -------------------------------------------------------------------------
 
   if (loading || sessionLoading) {
     return <SkeletonPatientDetail />;
@@ -365,7 +365,7 @@ export default function PatientDetailPage() {
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ── En-tête de la fiche ── */}
+      {/* -- En-tête de la fiche -- */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -388,10 +388,10 @@ export default function PatientDetailPage() {
       </div>
 
 
-        {/* ── Carte identité ── */}
+        {/* -- Carte identité -- */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 flex flex-col gap-4">
 
-          {/* ── Feature 2.2 — Bandeau archivage ── */}
+          {/* -- Feature 2.2 — Bandeau archivage -- */}
           {!patient.is_active && (
             <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
               <span aria-hidden="true" className="shrink-0 text-base leading-snug">🗃️</span>
@@ -420,7 +420,7 @@ export default function PatientDetailPage() {
             <InfoItem label="Terme prévu" value={fmtDate(patient.expected_term)} />
           </div>
 
-          {/* ── Notes cliniques — édition inline ── */}
+          {/* -- Notes cliniques — édition inline -- */}
           <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
             <div className="flex items-center justify-between mb-1">
               <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wide">
@@ -441,7 +441,7 @@ export default function PatientDetailPage() {
             </div>
 
             {notesEditing ? (
-              /* ── État édition ── */
+              /* -- État édition -- */
               <div className="flex flex-col gap-2 mt-1">
                 <div className="relative">
                   <textarea
@@ -505,10 +505,10 @@ export default function PatientDetailPage() {
                 </div>
               </div>
             ) : patient.notes ? (
-              /* ── État lecture avec contenu ── */
+              /* -- État lecture avec contenu -- */
               <p className="text-sm text-gray-600 leading-relaxed">{patient.notes}</p>
             ) : (
-              /* ── État vide ── */
+              /* -- État vide -- */
               <button
                 type="button"
                 onClick={openNotesEdit}
@@ -533,7 +533,7 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
-        {/* ── Feature 3.2 — Résumé IA 7 jours ── */}
+        {/* -- Feature 3.2 — Résumé IA 7 jours -- */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wide">
@@ -613,7 +613,7 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-        {/* ── Graphique évolution 30 jours (F06) ── */}
+        {/* -- Graphique évolution 30 jours (F06) -- */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wide">
@@ -658,7 +658,7 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
-        {/* ── Calendrier 30 jours ── */}
+        {/* -- Calendrier 30 jours -- */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-4">
             Questionnaires
@@ -703,7 +703,7 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
-        {/* ── Détail entrée sélectionnée ── */}
+        {/* -- Détail entrée sélectionnée -- */}
         {selectedEntry && (
           <div className={`rounded-2xl border p-5 flex flex-col gap-3 ${DETAIL_CARD[selectedEntry.alert_level] ?? 'bg-white border-gray-100'}`}>
             <div className="flex items-center justify-between">
@@ -740,7 +740,7 @@ export default function PatientDetailPage() {
           </div>
         )}
 
-        {/* ── Ajuster niveau risque ── */}
+        {/* -- Ajuster niveau risque -- */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-3">
             Niveau de risque (ajustement manuel)
@@ -769,7 +769,7 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
-        {/* ── Actions contact (F06 — Bouton WhatsApp direct) ── */}
+        {/* -- Actions contact (F06 — Bouton WhatsApp direct) -- */}
         <div className="flex gap-3">
           <a
             href={whatsappUrl(patient.phone)}
@@ -800,7 +800,7 @@ export default function PatientDetailPage() {
           </a>
         </div>
 
-        {/* ── Feature 2.2 — Bouton archiver / réactiver ── */}
+        {/* -- Feature 2.2 — Bouton archiver / réactiver -- */}
         <div className="pb-2">
           {patient.is_active ? (
             <button
@@ -844,7 +844,7 @@ export default function PatientDetailPage() {
           )}
         </div>
 
-      {/* ── Feature 2.2 — Modal de confirmation d'archivage ── */}
+      {/* -- Feature 2.2 — Modal de confirmation d'archivage -- */}
       <Modal
         open={archiveModalOpen}
         onClose={closeArchiveModal}
@@ -927,7 +927,7 @@ export default function PatientDetailPage() {
   );
 }
 
-// ─── InfoItem ─────────────────────────────────────────────────────────────────
+// --- InfoItem -----------------------------------------------------------------
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (

@@ -8,7 +8,7 @@ import { nextConsultations } from '@/lib/utils/pregnancy';
 import NotificationSettings from '@/components/patient/NotificationSettings';
 import SkeletonHistory from '@/components/patient/SkeletonHistory';
 
-// ─── Config couleurs ──────────────────────────────────────────────────────────
+// --- Config couleurs ----------------------------------------------------------
 
 const LEVEL_BG: Record<string, string> = {
   green: 'bg-emerald-400', orange: 'bg-orange-400', red: 'bg-red-500',
@@ -20,7 +20,7 @@ const LEVEL_TEXT: Record<string, string> = {
   green: 'text-emerald-700', orange: 'text-orange-700', red: 'text-red-700',
 };
 
-// ─── Composant ────────────────────────────────────────────────────────────────
+// --- Composant ----------------------------------------------------------------
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function HistoryPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">30 derniers jours</p>
         </div>
 
-        {/* ── Légende ── */}
+        {/* -- Légende -- */}
         <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
           {(['green', 'orange', 'red'] as const).map((l) => (
             <span key={l} className="flex items-center gap-1.5">
@@ -54,7 +54,7 @@ export default function HistoryPage() {
           </span>
         </div>
 
-        {/* ── Grille 30 jours ── */}
+        {/* -- Grille 30 jours -- */}
         <div className="grid grid-cols-7 gap-1.5" role="grid" aria-label="Calendrier 30 jours">
           {['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'].map((d) => (
             <div key={d} className="text-center text-[10px] font-semibold text-gray-400 dark:text-gray-500 py-1">{d}</div>
@@ -95,7 +95,7 @@ export default function HistoryPage() {
           })}
         </div>
 
-        {/* ── Détail jour sélectionné ── */}
+        {/* -- Détail jour sélectionné -- */}
         {selected?.response && (
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-5 flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -126,7 +126,7 @@ export default function HistoryPage() {
           </div>
         )}
 
-        {/* ── Rappels grossesse ── */}
+        {/* -- Rappels grossesse -- */}
         {pregnancyWeek !== null && (
           <div className="bg-[#FDE8F3] dark:bg-pink-950 border border-pink-200 dark:border-pink-800 rounded-xl p-4">
             <p className="text-xs font-semibold text-[#C9177A] dark:text-pink-400 uppercase tracking-wide mb-1">
@@ -143,7 +143,7 @@ export default function HistoryPage() {
           </div>
         )}
 
-        {/* ── Notifications push ── */}
+        {/* -- Notifications push -- */}
         <NotificationSettings />
     </div>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * ─── ScrollReveal ──────────────────────────────────────────────────────────────
+ * --- ScrollReveal --------------------------------------------------------------
  *
  * Composant client minimal qui observe l'entrée dans le viewport et déclenche
  * l'animation CSS `animate-in` (définie dans globals.css).
