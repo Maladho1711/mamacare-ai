@@ -228,10 +228,9 @@ export default function PatientDetailPage() {
 
   // Focus le bouton de confirmation quand la modal s'ouvre
   useEffect(() => {
-    if (archiveModalOpen) {
-      const t = setTimeout(() => confirmBtnRef.current?.focus(), 50);
-      return () => clearTimeout(t);
-    }
+    if (!archiveModalOpen) return undefined;
+    const t = setTimeout(() => confirmBtnRef.current?.focus(), 50);
+    return () => clearTimeout(t);
   }, [archiveModalOpen]);
 
   async function saveNotes() {

@@ -155,7 +155,7 @@ export default function PatientsPage() {
     visible = visible.filter((p) => p.status === statusFilter);
   }
   if (missedDaysFilter !== null) {
-    visible = visible.filter((p) => calcDaysMissed(p.last_submitted_at) >= missedDaysFilter);
+    visible = visible.filter((p) => calcDaysMissed(p.last_submitted_at ?? null) >= missedDaysFilter);
   }
   if (trimesterFilter !== null) {
     visible = visible.filter((p) => calcTrimester(p.pregnancy_start) === trimesterFilter);

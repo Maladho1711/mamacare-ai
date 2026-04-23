@@ -71,10 +71,10 @@ export default function LandingPage() {
           <ScrollReveal>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
               {[
-                { value: ‘550’, label: ‘Décès maternels / 100k’, sub: ‘en Guinée’ },
-                { value: ‘<3 min’, label: ‘Questionnaire quotidien’, sub: ‘simple et rapide’ },
-                { value: ‘<2 min’, label: "Délai d’alerte", sub: ‘au médecin’ },
-                { value: ‘24/7’, label: ‘Surveillance IA’, sub: ‘protocole OMS’ },
+                { value: '550', label: 'Décès maternels / 100k', sub: 'en Guinée' },
+                { value: '<3 min', label: 'Questionnaire quotidien', sub: 'simple et rapide' },
+                { value: '<2 min', label: "Délai d'alerte", sub: 'au médecin' },
+                { value: '24/7', label: 'Surveillance IA', sub: 'protocole OMS' },
               ].map((stat) => (
                 <div key={stat.label}>
                   <div className="text-3xl md:text-4xl font-bold">{stat.value}</div>
@@ -105,22 +105,22 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: ‘⏱️’,
-                title: ‘Retard de décision’,
-                desc: ‘La femme ne reconnaît pas les signes de danger. MamaCare pose les bonnes questions chaque jour et explique les risques en français simple.’,
-                color: ‘bg-red-50 text-red-600’,
+                icon: '⏱️',
+                title: 'Retard de décision',
+                desc: 'La femme ne reconnaît pas les signes de danger. MamaCare pose les bonnes questions chaque jour et explique les risques en français simple.',
+                color: 'bg-red-50 text-red-600',
               },
               {
-                icon: ‘📱’,
-                title: "Retard d’accès",
+                icon: '📱',
+                title: "Retard d'accès",
                 desc: "Le médecin est alerté trop tard. MamaCare envoie une alerte WhatsApp + SMS au médecin en moins de 2 minutes.",
-                color: ‘bg-orange-50 text-orange-600’,
+                color: 'bg-orange-50 text-orange-600',
               },
               {
-                icon: ‘📋’,
-                title: ‘Retard de traitement’,
-                desc: "Le médecin manque d’informations. MamaCare fournit l’historique complet des symptômes sur 30 jours avec analyse IA.",
-                color: ‘bg-green-50 text-green-600’,
+                icon: '📋',
+                title: 'Retard de traitement',
+                desc: "Le médecin manque d'informations. MamaCare fournit l'historique complet des symptômes sur 30 jours avec analyse IA.",
+                color: 'bg-green-50 text-green-600',
               },
             ].map((item, i) => (
               <ScrollReveal key={item.title} delayMs={i * 100}>
@@ -158,24 +158,24 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-6">
             {[
               {
-                step: ‘1’,
-                title: ‘Inscription’,
-                desc: "Le médecin crée le profil de sa patiente. Elle reçoit un lien SMS pour accéder à l’app.",
+                step: '1',
+                title: 'Inscription',
+                desc: "Le médecin crée le profil de sa patiente. Elle reçoit un lien SMS pour accéder à l'app.",
               },
               {
-                step: ‘2’,
-                title: ‘Questionnaire quotidien’,
-                desc: ‘Chaque matin, la patiente répond à 10-15 questions simples sur ses symptômes en moins de 3 minutes.’,
+                step: '2',
+                title: 'Questionnaire quotidien',
+                desc: 'Chaque matin, la patiente répond à 10-15 questions simples sur ses symptômes en moins de 3 minutes.',
               },
               {
-                step: ‘3’,
-                title: ‘Analyse IA + OMS’,
-                desc: "L’IA analyse les réponses selon les protocoles OMS et attribue un niveau d’alerte : vert, orange ou rouge.",
+                step: '3',
+                title: 'Analyse IA + OMS',
+                desc: "L'IA analyse les réponses selon les protocoles OMS et attribue un niveau d'alerte : vert, orange ou rouge.",
               },
               {
-                step: ‘4’,
-                title: ‘Alerte au médecin’,
-                desc: ‘En cas de danger, le médecin reçoit une alerte WhatsApp immédiate avec les détails des symptômes.’,
+                step: '4',
+                title: 'Alerte au médecin',
+                desc: 'En cas de danger, le médecin reçoit une alerte WhatsApp immédiate avec les détails des symptômes.',
               },
             ].map((item, i) => (
               <ScrollReveal key={item.step} delayMs={i * 100}>
@@ -218,10 +218,10 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm text-gray-600">
                 {[
                   'Questionnaire simple en français, moins de 3 minutes',
-                  'Explication claire de vos symptômes par l’IA',
+                  "Explication claire de vos symptômes par l'IA",
                   'Historique complet de votre grossesse',
                   'Fonctionne même avec une connexion lente',
-                  'Aucun téléchargement — s’installe directement',
+                  "Aucun téléchargement — s'installe directement",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="text-[#E91E8C] mt-0.5 shrink-0">✓</span>
@@ -242,8 +242,8 @@ export default function LandingPage() {
               <ul className="space-y-3 text-sm text-gray-600">
                 {[
                   'Dashboard temps réel de toutes vos patientes',
-                  'Alertes WhatsApp + SMS en cas d’urgence',
-                  'Historique 30 jours avec graphique d’évolution',
+                  "Alertes WhatsApp + SMS en cas d'urgence",
+                  "Historique 30 jours avec graphique d'évolution",
                   'Tri automatique par niveau de risque',
                   'Gestion complète des profils patientes',
                 ].map((item) => (

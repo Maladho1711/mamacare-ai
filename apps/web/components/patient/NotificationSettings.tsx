@@ -244,7 +244,7 @@ export default function NotificationSettings({
             onClick={handleSaveTime}
             disabled={savingTime}
           >
-            {saveSuccess ? '✓ Heure sauvegardée !' : 'Sauvegarder l'heure'}
+            {saveSuccess ? '✓ Heure sauvegardée !' : "Sauvegarder l'heure"}
           </Button>
         </div>
       )}

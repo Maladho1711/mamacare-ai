@@ -133,7 +133,7 @@ export function usePushNotifications() {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey),
+        applicationServerKey: urlBase64ToUint8Array(publicKey) as Uint8Array<ArrayBuffer>,
       });
 
       // 4. Envoyer la subscription au backend
@@ -153,7 +153,7 @@ export function usePushNotifications() {
       return true;
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Erreur lors de l'activation.';
+        err instanceof Error ? err.message : "Erreur lors de l'activation.";
       setState((prev) => ({ ...prev, loading: false, error: message }));
       return false;
     }
