@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /patients
+Disallow: /alerts
+Disallow: /appointments
+Disallow: /profile
+Disallow: /questionnaire
+Disallow: /history
+Disallow: /result
+
+Sitemap: https://mamacare-ai.vercel.app/sitemap.xml

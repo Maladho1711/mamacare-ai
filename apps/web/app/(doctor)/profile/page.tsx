@@ -188,7 +188,8 @@ export default function ProfilePage() {
       icon:        <BellIcon size={18} className="text-amber-500" />,
       label:       'Gérer les notifications',
       description: 'Push, WhatsApp, SMS',
-      onClick:     () => router.push('/notifications'),
+      onClick:     () => { /* TODO: page /notifications */ },
+      badge:       'Bientôt',
     },
     {
       icon:        <DownloadIcon size={18} className="text-blue-600" />,
