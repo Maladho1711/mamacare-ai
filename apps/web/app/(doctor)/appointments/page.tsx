@@ -45,7 +45,7 @@ const TYPE_LABEL: Record<Appointment['type'], string> = {
   vaccination: 'Vaccination',
   ultrasound: 'Échographie',
   consultation: 'Consultation',
-  postnatal: 'Suivi post-natal',
+  postnatal: 'Post-natal',
 };
 
 const TYPE_COLOR: Record<Appointment['type'], string> = {
@@ -56,7 +56,16 @@ const TYPE_COLOR: Record<Appointment['type'], string> = {
   postnatal: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
 };
 
-function formatDate(iso: string): string {
+/** Emoji discret associé à chaque type de consultation — lecture rapide mobile */
+const TYPE_ICON: Record<Appointment['type'], string> = {
+  cpn: '🤰',
+  vaccination: '💉',
+  ultrasound: '🔬',
+  consultation: '🩺',
+  postnatal: '👶',
+};
+
+function formatDateLong(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', {
     weekday: 'long',
     day: 'numeric',
@@ -70,6 +79,38 @@ function formatTime(iso: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+/**
+ * Regroupe les RDV par période relative : Aujourd'hui, Demain, Cette semaine, Plus tard.
+ * Bien plus lisible qu'un regroupement par date absolue pour le médecin.
+ */
+function bucketOf(iso: string): { key: string; label: string; order: number } {
+  const now = new Date();
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const endOfWeek = new Date(today);
+  endOfWeek.setDate(today.getDate() + 7);
+
+  const d = new Date(iso);
+  const dayStart = new Date(d);
+  dayStart.setHours(0, 0, 0, 0);
+
+  if (dayStart.getTime() < today.getTime()) {
+    return { key: 'past', label: '📋 Passés', order: 4 };
+  }
+  if (dayStart.getTime() === today.getTime()) {
+    return { key: 'today', label: "🔥 Aujourd'hui", order: 0 };
+  }
+  if (dayStart.getTime() === tomorrow.getTime()) {
+    return { key: 'tomorrow', label: '⏰ Demain', order: 1 };
+  }
+  if (dayStart.getTime() < endOfWeek.getTime()) {
+    return { key: 'week', label: '📅 Cette semaine', order: 2 };
+  }
+  return { key: 'later', label: '🗓️ Plus tard', order: 3 };
 }
 
 export default function AppointmentsPage() {
@@ -129,15 +170,38 @@ export default function AppointmentsPage() {
       });
   }, [appointments, filter]);
 
+  /** Regroupement intelligent par période relative (Aujourd'hui/Demain/…) */
   const grouped = useMemo(() => {
-    const groups = new Map<string, Appointment[]>();
+    const groups = new Map<string, { label: string; order: number; items: Appointment[] }>();
     for (const a of filtered) {
-      const key = formatDate(a.scheduledAt);
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push(a);
+      const bucket = bucketOf(a.scheduledAt);
+      if (!groups.has(bucket.key)) {
+        groups.set(bucket.key, { label: bucket.label, order: bucket.order, items: [] });
+      }
+      groups.get(bucket.key)!.items.push(a);
     }
-    return Array.from(groups.entries());
+    return Array.from(groups.values()).sort((a, b) => a.order - b.order);
   }, [filtered]);
+
+  /** KPIs en-tête : aujourd'hui, à venir 7j, en retard/annulé */
+  const stats = useMemo(() => {
+    const now = Date.now();
+    const in7 = now + 7 * 86_400_000;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = todayStart.getTime() + 86_400_000;
+    return {
+      today: appointments.filter((a) => {
+        const t = new Date(a.scheduledAt).getTime();
+        return t >= todayStart.getTime() && t < todayEnd && a.status === 'scheduled';
+      }).length,
+      upcoming: appointments.filter((a) => {
+        const t = new Date(a.scheduledAt).getTime();
+        return t >= now && t < in7 && a.status === 'scheduled';
+      }).length,
+      completed: appointments.filter((a) => a.status === 'completed').length,
+    };
+  }, [appointments]);
 
   const patientName = (id: string) =>
     patients.find((p) => p.id === id)?.fullName ?? 'Patiente inconnue';
@@ -200,9 +264,41 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      {/* Hero — gradient subtil + KPIs intégrés */}
+      <div className="bg-gradient-to-br from-pink-50 to-white dark:from-pink-950/30 dark:to-gray-900 rounded-2xl border border-pink-100 dark:border-pink-950 p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Rendez-vous
+            </h1>
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Rappels SMS automatiques la veille pour vos patientes
+            </p>
+          </div>
+          <Button variant="primary" size="sm" onClick={() => setModalOpen(true)}>
+            + Nouveau
+          </Button>
+        </div>
+        {/* KPIs inline */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-3 border border-gray-100 dark:border-gray-800">
+            <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold">Aujourd&apos;hui</p>
+            <p className="text-2xl font-bold text-[#E91E8C] mt-0.5">{stats.today}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-3 border border-gray-100 dark:border-gray-800">
+            <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold">7 jours</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-0.5">{stats.upcoming}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-3 border border-gray-100 dark:border-gray-800">
+            <p className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400 font-semibold">Honorés</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{stats.completed}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Header original caché — remplacé par le hero ci-dessus */}
+      <div className="hidden">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Rendez-vous
@@ -247,30 +343,56 @@ export default function AppointmentsPage() {
         </div>
       ) : grouped.length === 0 ? (
         <EmptyState
+          icon="📅"
           title="Aucun rendez-vous"
-          description="Crée un rendez-vous pour commencer le suivi."
+          description={
+            filter === 'upcoming'
+              ? "Aucun RDV à venir. Crée-en un pour commencer le suivi de tes patientes."
+              : filter === 'past'
+                ? 'Aucun rendez-vous passé pour le moment.'
+                : 'Crée un premier rendez-vous pour démarrer.'
+          }
+          action={
+            filter === 'upcoming' ? (
+              <Button size="sm" onClick={() => setModalOpen(true)}>+ Créer un RDV</Button>
+            ) : undefined
+          }
         />
       ) : (
-        <div className="space-y-6">
-          {grouped.map(([date, list]) => (
-            <section key={date}>
-              <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                {date}
-              </h2>
+        <div className="space-y-5">
+          {grouped.map((group) => (
+            <section key={group.label}>
+              <div className="flex items-center gap-2 mb-3">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                  {group.label}
+                </h2>
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-0.5">
+                  {group.items.length}
+                </span>
+              </div>
               <div className="space-y-2">
-                {list.map((a) => (
+                {group.items.map((a) => (
                   <div
                     key={a.id}
-                    className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 shadow-sm"
+                    className="group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-pink-200 dark:hover:border-pink-900 transition-all"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                      <div className="flex-1 min-w-0 flex gap-3">
+                        {/* Colonne heure/date visible en 1 clin d'oeil */}
+                        <div className="shrink-0 text-center">
+                          <div className="text-2xl mb-0.5" aria-hidden="true">{TYPE_ICON[a.type]}</div>
+                          <div className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-none">
                             {formatTime(a.scheduledAt)}
-                          </span>
+                          </div>
+                          <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 leading-none">
+                            {new Date(a.scheduledAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                          </div>
+                        </div>
+                        {/* Contenu principal */}
+                        <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_COLOR[a.type]}`}
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TYPE_COLOR[a.type]}`}
                           >
                             {TYPE_LABEL[a.type]}
                           </span>
@@ -279,7 +401,7 @@ export default function AppointmentsPage() {
                               {a.status === 'completed'
                                 ? '✓ Honoré'
                                 : a.status === 'cancelled'
-                                  ? 'Annulé'
+                                  ? '✕ Annulé'
                                   : 'Manqué'}
                             </span>
                           )}
@@ -303,7 +425,8 @@ export default function AppointmentsPage() {
                             {a.description}
                           </p>
                         )}
-                      </div>
+                        </div>{/* close content wrapper */}
+                      </div>{/* close flex-1 flex gap-3 */}
 
                       {a.status === 'scheduled' && (
                         <div className="flex flex-col gap-1 shrink-0">

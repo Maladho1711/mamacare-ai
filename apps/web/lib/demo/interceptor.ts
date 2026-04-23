@@ -28,13 +28,32 @@ import {
   DEMO_ALERTS,
   DEMO_HISTORY_PATIENT,
   DEMO_HISTORY_DOCTOR,
+  DEMO_APPOINTMENTS,
 } from './mock-data';
 
 // Alerts state mutable pour simuler la résolution
 type AlertState = Omit<(typeof DEMO_ALERTS)[number], 'resolved_at'> & { resolved_at: string | null };
 let alertsState: AlertState[] = DEMO_ALERTS.map((a) => ({ ...a }));
 
-export function getDemoResponse<T>(path: string, method: string): T {
+// Appointments state mutable pour simuler create/update/delete
+// Type relâché pour permettre null dans description/location/notes à la création
+interface AppointmentState {
+  id: string;
+  patientId: string;
+  doctorId: string;
+  type: 'cpn' | 'vaccination' | 'ultrasound' | 'consultation' | 'postnatal';
+  title: string;
+  description: string | null;
+  scheduledAt: string;
+  location: string | null;
+  status: 'scheduled' | 'completed' | 'missed' | 'cancelled';
+  notes: string | null;
+}
+let appointmentsState: AppointmentState[] = DEMO_APPOINTMENTS.map((a) => ({ ...a }));
+
+export function getDemoResponse<T>(rawPath: string, method: string): T {
+  // Strip query string — '/appointments?from=X&to=Y' → '/appointments'
+  const path = rawPath.split('?')[0];
   // -- GET /patients --------------------------------------------------------
   if (method === 'GET' && path === '/patients') {
     return DEMO_PATIENTS as unknown as T;
@@ -153,7 +172,51 @@ export function getDemoResponse<T>(path: string, method: string): T {
     } as unknown as T;
   }
 
-  // -- Fallback : tout autre endpoint → objet vide sans erreur -------------
+  // ═══ APPOINTMENTS ═════════════════════════════════════════════════════════
+
+  // -- GET /appointments (avec query from/to filtrage) ---------------------
+  if (method === 'GET' && path === '/appointments') {
+    return appointmentsState as unknown as T;
+  }
+
+  // -- POST /appointments --------------------------------------------------
+  if (method === 'POST' && path === '/appointments') {
+    const newAppt: AppointmentState = {
+      id:          `demo-appt-${Date.now()}`,
+      patientId:   DEMO_PATIENTS[0]!.id,
+      doctorId:    DEMO_DOCTOR.id,
+      type:        'cpn',
+      title:       'Nouveau rendez-vous',
+      description: null,
+      scheduledAt: new Date(Date.now() + 86_400_000).toISOString(),
+      location:    null,
+      status:      'scheduled',
+      notes:       null,
+    };
+    appointmentsState = [...appointmentsState, newAppt];
+    return newAppt as unknown as T;
+  }
+
+  // -- PATCH /appointments/:id ---------------------------------------------
+  const apptMatch = path.match(/^\/appointments\/([^/]+)$/);
+  if (method === 'PATCH' && apptMatch) {
+    const id = apptMatch[1];
+    appointmentsState = appointmentsState.map((a) =>
+      a.id === id ? { ...a, status: 'completed' as const } : a,
+    );
+    return (appointmentsState.find((a) => a.id === id) ?? appointmentsState[0]!) as unknown as T;
+  }
+
+  // -- DELETE /appointments/:id --------------------------------------------
+  if (method === 'DELETE' && apptMatch) {
+    const id = apptMatch[1];
+    appointmentsState = appointmentsState.filter((a) => a.id !== id);
+    return {} as T;
+  }
+
+  // -- Fallback : tout autre endpoint → tableau vide si GET, objet vide sinon
+  // (évite les crashs .filter/.map sur les endpoints non mockés)
+  if (method === 'GET') return [] as unknown as T;
   return {} as T;
 }
 

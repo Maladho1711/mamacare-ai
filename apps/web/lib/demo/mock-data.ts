@@ -194,6 +194,75 @@ export const DEMO_HISTORY_DOCTOR = [
     'Bonne évolution générale. Prochain rendez-vous dans une semaine.'),
 ];
 
+// --- Rendez-vous démo (5 RDV répartis passé + à venir) -----------------------
+
+function apptAt(hoursFromNow: number): string {
+  return new Date(Date.now() + hoursFromNow * 3_600_000).toISOString();
+}
+
+export const DEMO_APPOINTMENTS = [
+  {
+    id:          'demo-appt-1',
+    patientId:   'demo-patient-1',
+    doctorId:    DEMO_DOCTOR.id,
+    type:        'cpn' as const,
+    title:       'CPN 3 — Mesure TA, poids, hauteur utérine',
+    description: 'Consultation prénatale trimestrielle',
+    scheduledAt: apptAt(4), // dans 4h
+    location:    'CS de Pita',
+    status:      'scheduled' as const,
+    notes:       null,
+  },
+  {
+    id:          'demo-appt-2',
+    patientId:   'demo-patient-2',
+    doctorId:    DEMO_DOCTOR.id,
+    type:        'ultrasound' as const,
+    title:       'Échographie morphologique',
+    description: 'T2 — contrôle développement foetal',
+    scheduledAt: apptAt(26), // demain
+    location:    'Hôpital Ignace Deen',
+    status:      'scheduled' as const,
+    notes:       null,
+  },
+  {
+    id:          'demo-appt-3',
+    patientId:   'demo-patient-1',
+    doctorId:    DEMO_DOCTOR.id,
+    type:        'vaccination' as const,
+    title:       'Vaccin antitétanique — 2ème dose',
+    description: null,
+    scheduledAt: apptAt(72), // dans 3j
+    location:    'CS de Pita',
+    status:      'scheduled' as const,
+    notes:       null,
+  },
+  {
+    id:          'demo-appt-4',
+    patientId:   'demo-patient-3',
+    doctorId:    DEMO_DOCTOR.id,
+    type:        'consultation' as const,
+    title:       'Suivi post-natal — 6 semaines',
+    description: 'Contrôle récupération + allaitement',
+    scheduledAt: apptAt(120), // dans 5j
+    location:    'Cabinet Dr. Barry',
+    status:      'scheduled' as const,
+    notes:       null,
+  },
+  {
+    id:          'demo-appt-5',
+    patientId:   'demo-patient-1',
+    doctorId:    DEMO_DOCTOR.id,
+    type:        'cpn' as const,
+    title:       'CPN 2',
+    description: null,
+    scheduledAt: apptAt(-48), // il y a 2 jours
+    location:    'CS de Pita',
+    status:      'completed' as const,
+    notes:       'Tout va bien. TA : 110/70. Poids : 62 kg (+1kg).',
+  },
+];
+
 export const DEMO_HISTORY_PATIENT = [
   historyEntry(0, 'green',  [],
     'Tout va bien aujourd\'hui. Continuez à prendre soin de vous.'),
