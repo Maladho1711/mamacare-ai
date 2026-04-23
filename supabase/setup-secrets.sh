@@ -33,6 +33,12 @@ INTERNAL_CRON_SECRET="0a3aabb70de6bc4ddaf12df2966c1265a251364a1c28cf1f4f5d4cc553
 DEV_MODE_SECRET="145811dcd676948f1995a67e083b26bdc3a4ccca59d219b56f4c8a746d9448f9"
 PWA_URL="https://mamacare-ai.vercel.app"
 
+# ─── Clés VAPID pour les push notifications (générées le 23 avril 2026) ───────
+# Ces clés sont dédiées à MamaCare AI. Garde-les secrètes — la privée surtout.
+VAPID_PUBLIC_KEY="BCf6IH9Vfp99M8q80GyivHNoU6Odid2E6Ehavd16YUuNJOUkmApZZHzmLQBZVR9jPrHRK0vdHIxsFhbafy3FEZ0"
+VAPID_PRIVATE_KEY="sXppUfkvOIvL4XRlQZE55cgUmIhzhwnN4SzSeZrC8us"
+VAPID_SUBJECT="mailto:contact@improove.co"
+
 # ─── SECRETS À REMPLIR (API tiers) ────────────────────────────────────────────
 # Remplace les "REMPLIR_..." par tes vraies clés avant de lancer.
 # Si tu n'as pas encore une clé, laisse vide — la fonctionnalité sera juste
@@ -52,6 +58,9 @@ npx --yes supabase@latest secrets set \
   INTERNAL_CRON_SECRET="$INTERNAL_CRON_SECRET" \
   DEV_MODE_SECRET="$DEV_MODE_SECRET" \
   PWA_URL="$PWA_URL" \
+  VAPID_PUBLIC_KEY="$VAPID_PUBLIC_KEY" \
+  VAPID_PRIVATE_KEY="$VAPID_PRIVATE_KEY" \
+  VAPID_SUBJECT="$VAPID_SUBJECT" \
   ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
   WHATSAPP_ACCESS_TOKEN="$WHATSAPP_ACCESS_TOKEN" \
   WHATSAPP_PHONE_NUMBER_ID="$WHATSAPP_PHONE_NUMBER_ID" \
