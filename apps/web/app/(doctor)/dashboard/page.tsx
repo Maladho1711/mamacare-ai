@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDashboard, type PatientRow } from '@/hooks/useDashboard';
 import { isToday } from '@/lib/utils/date';
 import { calcPregnancyWeek } from '@/lib/utils/pregnancy';
+import { apiClient } from '@/lib/api/client';
 import PatientTable from '@/components/doctor/PatientTable';
 import AlertBadge from '@/components/doctor/AlertBadge';
 import Button from '@/components/ui/Button';
@@ -77,9 +78,37 @@ export default function DashboardPage() {
   const [missedDaysFilter, setMissedDaysFilter] = useState<MissedDaysFilter>(null);
   const [trimesterFilter,  setTrimesterFilter]  = useState<TrimesterFilter>(null);
 
+  // -- KPIs additionnels : RDV cette semaine + compliance ---------------------
+  const [upcomingWeek, setUpcomingWeek] = useState<number>(0);
+
+  useEffect(() => {
+    if (loading) return;
+    const now = new Date();
+    const in7 = new Date(now);
+    in7.setDate(now.getDate() + 7);
+    apiClient
+      .get<Array<{ scheduledAt: string; status: string }>>(
+        `/appointments?from=${now.toISOString()}&to=${in7.toISOString()}`,
+      )
+      .then((rows) => {
+        setUpcomingWeek(rows.filter((r) => r.status === 'scheduled').length);
+      })
+      .catch(() => setUpcomingWeek(0));
+  }, [loading]);
+
   if (loading) {
     return <SkeletonDashboard />;
   }
+
+  // Compliance = % de patientes ayant rempli aujourd'hui
+  const compliance =
+    patients.length > 0
+      ? Math.round(
+          (patients.filter((p) => isToday(p.last_submitted_at)).length /
+            patients.length) *
+            100,
+        )
+      : 0;
 
   // -- Application des filtres (cumulatifs) ----------------------------------
   const filtered: PatientRow[] = patients.filter((p) => {
@@ -145,6 +174,42 @@ export default function DashboardPage() {
           <StatCard label="Urgences"        value={stats.red}    color="text-red-700 dark:text-red-400"     bg={filter === 'red'    ? 'bg-red-100 dark:bg-red-950'       : 'bg-red-50 dark:bg-red-950/60'}    active={filter === 'red'}    onClick={() => toggleFilter('red')} />
           <StatCard label="À surveiller"    value={stats.orange} color="text-orange-700 dark:text-orange-400" bg={filter === 'orange' ? 'bg-orange-100 dark:bg-orange-950'  : 'bg-orange-50 dark:bg-orange-950/60'} active={filter === 'orange'} onClick={() => toggleFilter('orange')} />
           <StatCard label="Sans check auj." value={stats.missed} color="text-gray-600 dark:text-gray-300"   bg={filter === 'missed' ? 'bg-gray-200 dark:bg-gray-800'     : 'bg-gray-100 dark:bg-gray-800/60'}  active={filter === 'missed'} onClick={() => toggleFilter('missed')} />
+        </div>
+
+        {/* -- KPIs additionnels : compliance + RDV à venir -- */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Compliance aujourd'hui</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-0.5">{compliance}%</p>
+              </div>
+              <div className={`text-3xl ${compliance >= 70 ? 'text-emerald-500' : compliance >= 40 ? 'text-orange-500' : 'text-red-500'}`}>
+                {compliance >= 70 ? '✓' : compliance >= 40 ? '~' : '!'}
+              </div>
+            </div>
+            <div className="mt-2 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all ${compliance >= 70 ? 'bg-emerald-500' : compliance >= 40 ? 'bg-orange-500' : 'bg-red-500'}`}
+                style={{ width: `${compliance}%` }}
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push('/appointments')}
+            className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-3 text-left hover:border-[#E91E8C] transition-colors"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">RDV cette semaine</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-0.5">{upcomingWeek}</p>
+              </div>
+              <div className="text-3xl text-[#E91E8C]">📅</div>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Voir tous les rendez-vous →</p>
+          </button>
         </div>
 
         {/* -- Filtres avancés -- */}

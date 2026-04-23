@@ -377,6 +377,13 @@ export default function PatientDetailPage() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
+            onClick={() => router.push(`/patients/${patient.id}/print`)}
+            className="text-xs text-gray-500 dark:text-gray-400 hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors px-2 py-1"
+            title="Imprimer / Enregistrer en PDF"
+          >
+            PDF
+          </button>
+          <button
             onClick={() => router.push(`/patients/${patient.id}/edit`)}
             className="text-xs text-gray-500 dark:text-gray-400 hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors px-2 py-1"
           >

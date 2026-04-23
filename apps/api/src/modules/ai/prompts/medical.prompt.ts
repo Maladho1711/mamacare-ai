@@ -27,22 +27,65 @@ export interface SummaryHistoryEntry {
  * Il ne décide jamais du niveau d'alerte ni de conduite à tenir.
  */
 export function buildSummaryPrompt(history: SummaryHistoryEntry[]): string {
-  return `Tu es un assistant médical de synthèse pour les médecins guinéens.
-Voici les résultats des ${history.length} derniers questionnaires d'une patiente.
+  // Tendance pondérée : semaine récente vs période antérieure
+  const weights: Record<string, number> = { red: 3, orange: 1, green: 0 };
+  const scoreOf = (level: string): number => weights[level] ?? 0;
 
+  const recent = history.slice(0, Math.min(7, history.length));
+  const older = history.slice(7);
+  const avgRecent =
+    recent.reduce((s, h) => s + scoreOf(h.level), 0) / Math.max(recent.length, 1);
+  const avgOlder =
+    older.length > 0
+      ? older.reduce((s, h) => s + scoreOf(h.level), 0) / older.length
+      : avgRecent;
+  const trend =
+    avgRecent > avgOlder + 0.3
+      ? 'DÉGRADATION (récent plus sévère)'
+      : avgRecent < avgOlder - 0.3
+        ? 'AMÉLIORATION (récent plus calme)'
+        : 'STABLE';
+
+  // Fréquence des règles déclenchées
+  const ruleCount = new Map<string, number>();
+  for (const h of history) {
+    for (const r of h.rules) ruleCount.set(r, (ruleCount.get(r) ?? 0) + 1);
+  }
+  const recurrent = Array.from(ruleCount.entries())
+    .filter(([, n]) => n >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .map(([r, n]) => `${r} (${n}×)`)
+    .join(', ');
+
+  const counts = {
+    red: history.filter((h) => h.level === 'red').length,
+    orange: history.filter((h) => h.level === 'orange').length,
+    green: history.filter((h) => h.level === 'green').length,
+  };
+
+  return `Tu es un assistant médical de synthèse pour les médecins guinéens.
+Voici l'analyse de ${history.length} questionnaires récents d'une patiente.
+
+STATISTIQUES :
+- Rouges : ${counts.red} | Oranges : ${counts.orange} | Verts : ${counts.green}
+- Tendance calculée : ${trend}
+- Signes récurrents : ${recurrent || 'aucun'}
+
+DÉTAIL JOUR PAR JOUR (15 derniers max) :
 ${history
+  .slice(0, 15)
   .map(
     (h, i) =>
-      `Jour ${i + 1} (${h.date}) — Niveau: ${h.level}\n` +
-      `Signes: ${h.rules.length > 0 ? h.rules.join(', ') : 'aucun signe particulier'}\n` +
-      (h.analysis ? `Analyse: ${h.analysis}` : ''),
+      `J${i + 1} (${h.date}) — ${h.level.toUpperCase()} — ` +
+      (h.rules.length > 0 ? h.rules.join(', ') : 'RAS'),
   )
-  .join('\n\n')}
+  .join('\n')}
 
-Génère une synthèse médicale concise en 3-4 phrases pour le médecin :
-1. Tendance générale (amélioration / stable / dégradation)
-2. Signes récurrents s'il y en a
-3. Points d'attention
+Génère une synthèse médicale en 4-5 phrases pour le médecin :
+1. Tendance sur la période (confirme ou nuance le calcul)
+2. Symptômes récurrents à surveiller
+3. Niveau de vigilance recommandé (faible / modéré / élevé)
+4. Action clinique suggérée (RDV rapproché, examen complémentaire, etc.)
 
-Réponds uniquement en français. Maximum 100 mots. Ne pose PAS de diagnostic. Dirige TOUJOURS vers le médecin pour les décisions.`;
+Réponds uniquement en français. 80-120 mots. Ne pose PAS de diagnostic définitif. La décision reste au médecin.`;
 }

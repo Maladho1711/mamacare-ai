@@ -14,6 +14,7 @@ import { ChartIcon, UsersIcon, BellIcon, LogoutIcon, HeartIcon, UserIcon } from 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/patients', label: 'Patientes' },
+  { href: '/appointments', label: 'Rendez-vous' },
   { href: '/alerts', label: 'Alertes' },
   { href: '/profile', label: 'Mon profil' },
 ];
