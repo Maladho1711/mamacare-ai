@@ -129,8 +129,9 @@ async function route(req: Request, path: string, url: URL): Promise<Response> {
   if (m && method === 'POST') return resolveAlert(req, m[1]);
 
   // ─── NOTIFICATIONS ─────────────────────────────────────────────────────────
+  if (path === '/notifications/vapid-public-key' && method === 'GET') return getVapidPublicKey();
   if (path === '/notifications/subscribe' && method === 'POST') return subscribePush(req);
-  if (path === '/notifications/unsubscribe' && method === 'POST') return unsubscribePush(req);
+  if (path === '/notifications/unsubscribe' && method === 'POST' || path === '/notifications/unsubscribe' && method === 'DELETE') return unsubscribePush(req);
   if (path === '/notifications/send-daily-reminders' && method === 'POST') return sendDailyReminders(req);
 
   return err(`Route non trouvée : ${method} ${path}`, 404);
@@ -836,6 +837,17 @@ async function deleteAppointment(req: Request, id: string): Promise<Response> {
 // ═══════════════════════════════════════════════════════════════════════════
 // NOTIFICATIONS HANDLERS
 // ═══════════════════════════════════════════════════════════════════════════
+
+function getVapidPublicKey(): Response {
+  const key = Deno.env.get('VAPID_PUBLIC_KEY');
+  if (!key) {
+    return json({
+      publicKey: '',
+      message: 'VAPID_PUBLIC_KEY non configurée — push désactivé',
+    }, 200);
+  }
+  return json({ publicKey: key });
+}
 
 async function subscribePush(req: Request): Promise<Response> {
   const user = await requireAuth(req);

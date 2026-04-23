@@ -17,25 +17,13 @@ const withPWA = require('next-pwa')({
 
   // ── Stratégies de cache Workbox ───────────────────────────────────────────
   runtimeCaching: [
-    // ── Network First : API NestJS ────────────────────────────────────────
-    // Tente le réseau d'abord ; si indisponible, sert le cache (5 min max).
+    // ── Network First : Supabase Edge Function API ───────────────────────
+    // L'ancien backend NestJS Render est mort — toutes les APIs passent
+    // désormais par /functions/v1/api sur Supabase.
     // Timeout 5s : assez long pour la 4G guinéenne, assez court pour ne pas
     // geler l'interface — le cache prend le relais rapidement en cas d'échec.
-    {
-      urlPattern: /^https?:\/\/.*\.(render\.com|localhost)(:\d+)?\/.*$/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'mamacare-api',
-        networkTimeoutSeconds: 5,
-        expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 5 * 60, // 5 min — données médicales fraîches
-        },
-        cacheableResponse: { statuses: [0, 200] },
-      },
-    },
 
-    // ── Network First : Supabase REST / Auth / Realtime ───────────────────
+    // ── Network First : Supabase REST / Auth / Realtime / Edge Functions ──
     {
       urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
       handler: 'NetworkFirst',
@@ -111,28 +99,14 @@ const withPWA = require('next-pwa')({
   ],
 });
 
-const API_URL = process.env.API_URL ?? 'http://localhost:3001';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['@mamacare/shared-types'],
   // Pas d'images externes — tout est local (contrainte réseau Guinée)
   images: { unoptimized: true },
 
-  /**
-   * Proxy /api/* → NestJS (port 3001).
-   * Permet d'appeler fetch('/api/auth/send-otp') depuis le navigateur
-   * sans CORS et sans exposer l'URL du backend.
-   * En production, API_URL pointe vers l'instance Render.
-   */
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${API_URL}/:path*`,
-      },
-    ];
-  },
+  // Plus de rewrites /api/* : depuis la migration Supabase Edge Functions
+  // (avril 2026), le client appelle directement SUPABASE_URL/functions/v1/api
 };
 
 // En dev on bypass next-pwa (incompatible Turbopack + déjà disable:true).
