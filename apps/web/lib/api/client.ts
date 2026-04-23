@@ -14,18 +14,25 @@ import { getDemoResponse, isDemoMode } from '@/lib/demo/interceptor';
 
 /**
  * URL de l'API — résolue dans l'ordre suivant :
- * 1. NEXT_PUBLIC_API_URL (override explicite)
- * 2. NEXT_PUBLIC_SUPABASE_URL + /functions/v1/api (Edge Function déployée)
- * 3. http://localhost:3001 (fallback dev NestJS legacy)
+ * 1. NEXT_PUBLIC_SUPABASE_URL + /functions/v1/api (Edge Function — mode standard)
+ * 2. NEXT_PUBLIC_API_URL (override explicite — dev local uniquement)
+ * 3. http://localhost:3001 (fallback dernière chance)
+ *
+ * En production, on privilégie TOUJOURS la Supabase Edge Function, même si
+ * NEXT_PUBLIC_API_URL pointe encore vers l'ancien NestJS (hérité .env.local).
  */
 function resolveApiUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_API_URL;
-  if (explicit && explicit.length > 0) return explicit;
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (supabaseUrl && !supabaseUrl.includes('placeholder') && !supabaseUrl.includes('fake-project')) {
+  if (
+    supabaseUrl &&
+    !supabaseUrl.includes('placeholder') &&
+    !supabaseUrl.includes('fake-project')
+  ) {
     return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/api`;
   }
+
+  const explicit = process.env.NEXT_PUBLIC_API_URL;
+  if (explicit && explicit.length > 0) return explicit;
 
   return 'http://localhost:3001';
 }
