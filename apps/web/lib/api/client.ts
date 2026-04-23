@@ -12,8 +12,25 @@
 import { getSession } from '@/lib/auth/session';
 import { getDemoResponse, isDemoMode } from '@/lib/demo/interceptor';
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+/**
+ * URL de l'API — résolue dans l'ordre suivant :
+ * 1. NEXT_PUBLIC_API_URL (override explicite)
+ * 2. NEXT_PUBLIC_SUPABASE_URL + /functions/v1/api (Edge Function déployée)
+ * 3. http://localhost:3001 (fallback dev NestJS legacy)
+ */
+function resolveApiUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_API_URL;
+  if (explicit && explicit.length > 0) return explicit;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (supabaseUrl && !supabaseUrl.includes('placeholder') && !supabaseUrl.includes('fake-project')) {
+    return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/api`;
+  }
+
+  return 'http://localhost:3001';
+}
+
+const API_URL = resolveApiUrl();
 
 /** Timeout 10s — contrainte réseau instable en Guinée (ARCHITECTURE.md) */
 const TIMEOUT_MS = 10_000;
