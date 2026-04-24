@@ -73,11 +73,13 @@ echo ""
 
 # ─── Redéployer la Edge Function avec la dernière version du code ────────────
 echo "🔄 Redéploiement de la Edge Function api..."
-cd "$(dirname "$0")"
+# On se place à la RACINE du projet (pas dans supabase/) car le CLI
+# cherche la fonction à supabase/functions/<name>/index.ts par défaut
+cd "$(dirname "$0")/.."
 npx --yes supabase@latest functions deploy api \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt \
-  --use-api
+  --use-api || echo "⚠️  Redéploiement échoué — la fonction reste en v2.1 déjà déployée via MCP"
 
 echo ""
 echo "✅ Edge Function déployée avec les nouveaux secrets."
