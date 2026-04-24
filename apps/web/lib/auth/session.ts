@@ -16,7 +16,7 @@
 export interface Session {
   token:    string;
   userId:   string;
-  role:     'doctor' | 'patient';
+  role:     'doctor' | 'patient' | 'admin';
   fullName: string;
 }
 

@@ -34,6 +34,71 @@ export const DEMO_DOCTOR = {
   role:     'doctor' as const,
 };
 
+// --- Administrateur démo (fondateur / superviseur plateforme) -----------------
+
+export const DEMO_ADMIN = {
+  id:       'demo-admin-1',
+  fullName: 'Maladho Barry',
+  phone:    '+224 623 43 65 13',
+  role:     'admin' as const,
+};
+
+/** Liste de tous les médecins sur la plateforme — vue admin. */
+export const DEMO_ALL_DOCTORS = [
+  {
+    id:             'demo-doctor-1',
+    fullName:       'Dr. Maladho Barry',
+    phone:          '+224 624 12 34 56',
+    hospital:       'CS de Pita',
+    patientsCount:  4,
+    activeAlerts:   2,
+    createdAt:      daysAgo(120),
+    lastActive:     daysAgo(0),
+  },
+  {
+    id:             'demo-doctor-2',
+    fullName:       'Dr. Aïssatou Camara',
+    phone:          '+224 628 45 67 89',
+    hospital:       'Hôpital Ignace Deen',
+    patientsCount:  12,
+    activeAlerts:   5,
+    createdAt:      daysAgo(95),
+    lastActive:     daysAgo(1),
+  },
+  {
+    id:             'demo-doctor-3',
+    fullName:       'Dr. Mamadou Diallo',
+    phone:          '+224 625 78 90 12',
+    hospital:       'CHU Donka',
+    patientsCount:  8,
+    activeAlerts:   1,
+    createdAt:      daysAgo(60),
+    lastActive:     daysAgo(0),
+  },
+  {
+    id:             'demo-doctor-4',
+    fullName:       'Dr. Fatoumata Bah',
+    phone:          '+224 629 34 56 78',
+    hospital:       'Clinique Pasteur',
+    patientsCount:  6,
+    activeAlerts:   0,
+    createdAt:      daysAgo(30),
+    lastActive:     daysAgo(2),
+  },
+];
+
+/** Stats globales de la plateforme — vue admin. */
+export const DEMO_ADMIN_STATS = {
+  totalDoctors:     4,
+  totalPatients:    30,
+  activeAlerts:     8,
+  questionnairesToday: 22,
+  complianceRate:   73, // % de patientes ayant rempli aujourd'hui
+  redAlertsWeek:    3,
+  orangeAlertsWeek: 12,
+  newPatientsWeek:  5,
+};
+
 // --- Patiente démo (connectée côté patient) -----------------------------------
 
 export const DEMO_PATIENT_SELF = {

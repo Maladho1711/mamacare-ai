@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient, ApiError } from '@/lib/api/client';
 import { saveSession } from '@/lib/auth/session';
-import { DEMO_DOCTOR, DEMO_PATIENT_SELF } from '@/lib/demo/mock-data';
+import { DEMO_DOCTOR, DEMO_PATIENT_SELF, DEMO_ADMIN } from '@/lib/demo/mock-data';
 import Button from '@/components/ui/Button';
 
 type Role = 'doctor' | 'patient';

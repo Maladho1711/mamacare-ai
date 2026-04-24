@@ -8,7 +8,7 @@ interface UseSessionOptions {
   /** Redirige vers /login si aucune session trouvée */
   required?:     boolean;
   /** Exige un rôle précis — redirige si le rôle ne correspond pas */
-  requireRole?:  'doctor' | 'patient';
+  requireRole?:  'doctor' | 'patient' | 'admin';
 }
 
 interface UseSessionReturn {
@@ -38,9 +38,16 @@ export function useSession(opts: UseSessionOptions = {}): UseSessionReturn {
     }
 
     if (opts.requireRole && found.role !== opts.requireRole) {
-      // Mauvais rôle → rediriger vers la bonne page
-      router.replace(found.role === 'doctor' ? '/dashboard' : '/questionnaire');
-      return;
+      // Exception : l'admin a accès à toutes les pages (dashboard médecin, etc.)
+      if (found.role !== 'admin') {
+        // Mauvais rôle → rediriger vers la bonne page
+        const target =
+          found.role === 'doctor' ? '/dashboard' :
+          found.role === 'admin' ? '/admin' :
+          '/questionnaire';
+        router.replace(target);
+        return;
+      }
     }
 
     setSession(found);

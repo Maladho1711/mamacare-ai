@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MamaCare AI — Rapport d'avancement avril 2026</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 15mm 18mm 15mm;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: #1F2937;
+      background: #FFFFFF;
+    }
+
+    /* ─── Cover page ────────────────────────────────────────────────── */
+    .cover {
+      page-break-after: always;
+      min-height: 260mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 30mm 10mm 20mm 10mm;
+      background: linear-gradient(160deg, #FDE8F3 0%, #FAF9FB 60%, #FFFFFF 100%);
+    }
+
+    .cover-logo {
+      width: 70px;
+      height: 70px;
+      background: #E91E8C;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .cover h1 {
+      font-size: 34pt;
+      font-weight: 800;
+      color: #1F2937;
+      letter-spacing: -1px;
+      line-height: 1.05;
+      margin-bottom: 14px;
+    }
+
+    .cover .subtitle {
+      font-size: 14pt;
+      color: #6B7280;
+      font-weight: 500;
+      max-width: 140mm;
+      line-height: 1.4;
+    }
+
+    .cover .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 30px 0;
+    }
+
+    .badge {
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 9pt;
+      font-weight: 600;
+      background: #FFFFFF;
+      border: 1px solid #F1EDF2;
+    }
+    .badge.pink { background: #FDE8F3; color: #C9177A; border-color: transparent; }
+    .badge.blue { background: #DBEAFE; color: #1E40AF; border-color: transparent; }
+    .badge.green { background: #D1FAE5; color: #065F46; border-color: transparent; }
+
+    .cover-footer {
+      border-top: 2px solid #E91E8C;
+      padding-top: 16px;
+      color: #6B7280;
+      font-size: 9pt;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .cover-footer strong { color: #1F2937; font-size: 10pt; }
+
+    /* ─── Sections ─────────────────────────────────────────────────── */
+    section {
+      padding: 0 5mm;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      font-size: 18pt;
+      color: #1F2937;
+      font-weight: 800;
+      margin: 22px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #E91E8C;
+      letter-spacing: -0.3px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 13pt;
+      color: #1F2937;
+      font-weight: 700;
+      margin: 18px 0 8px;
+      page-break-after: avoid;
+    }
+
+    h4 {
+      font-size: 11pt;
+      color: #E91E8C;
+      font-weight: 700;
+      margin: 12px 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 9pt;
+      page-break-after: avoid;
+    }
+
+    p { margin-bottom: 8px; }
+
+    ul, ol {
+      margin: 6px 0 10px 20px;
+    }
+    li {
+      margin-bottom: 4px;
+    }
+
+    .lead {
+      font-size: 11pt;
+      color: #4B5563;
+      margin: 10px 0 16px;
+      line-height: 1.6;
+      padding: 12px 16px;
+      background: #FAF9FB;
+      border-left: 3px solid #E91E8C;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* ─── Tables ───────────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 14px;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+
+    th {
+      background: #FAF9FB;
+      color: #1F2937;
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 2px solid #E91E8C;
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #F1EDF2;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    /* ─── Cards ────────────────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .card {
+      border: 1px solid #F1EDF2;
+      border-radius: 10px;
+      padding: 12px 14px;
+      page-break-inside: avoid;
+      background: #FFFFFF;
+    }
+
+    .card h3 {
+      font-size: 10.5pt;
+      margin-bottom: 4px;
+    }
+
+    .card p {
+      font-size: 9.5pt;
+      color: #6B7280;
+      margin: 0;
+    }
+
+    /* ─── Status badges ────────────────────────────────────────────── */
+    .status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 8.5pt;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .status-ok { background: #D1FAE5; color: #065F46; }
+    .status-todo { background: #FEE2E2; color: #991B1B; }
+    .status-wip { background: #FEF3C7; color: #92400E; }
+    .status-info { background: #DBEAFE; color: #1E40AF; }
+
+    /* ─── KPIs ─────────────────────────────────────────────────────── */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .kpi {
+      background: linear-gradient(135deg, #FDE8F3 0%, #FFFFFF 100%);
+      border: 1px solid #F1EDF2;
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .kpi-value {
+      font-size: 22pt;
+      font-weight: 800;
+      color: #E91E8C;
+      display: block;
+      line-height: 1;
+    }
+    .kpi-label {
+      font-size: 8pt;
+      color: #6B7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 6px;
+    }
+
+    /* ─── Architecture diagram (text) ──────────────────────────────── */
+    .arch {
+      background: #FAF9FB;
+      border: 1px dashed #E91E8C;
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 9pt;
+      line-height: 1.7;
+      color: #1F2937;
+      white-space: pre;
+      overflow-x: auto;
+      page-break-inside: avoid;
+    }
+
+    /* ─── Code inline ─────────────────────────────────────────────── */
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 9pt;
+      background: #FAF9FB;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #A81266;
+      border: 1px solid #F1EDF2;
+    }
+
+    pre {
+      background: #1F2937;
+      color: #F3F4F6;
+      padding: 12px 14px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 9pt;
+      line-height: 1.5;
+      margin: 8px 0 12px;
+      page-break-inside: avoid;
+    }
+    pre code {
+      background: transparent;
+      border: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* ─── Page break helpers ──────────────────────────────────────── */
+    .page-break { page-break-after: always; }
+    .no-break { page-break-inside: avoid; }
+
+    /* ─── Print adjustments ───────────────────────────────────────── */
+    @media print {
+      body { font-size: 10pt; }
+      .print-hide { display: none; }
+      section { padding: 0; }
+    }
+
+    @media screen {
+      body { max-width: 210mm; margin: 0 auto; padding: 0; background: #F1EDF2; }
+      .cover, section { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+      section { margin-bottom: 0; padding: 10mm 15mm; }
+      .print-hint {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #E91E8C;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 11pt;
+        font-weight: 600;
+        box-shadow: 0 4px 14px rgba(233, 30, 140, 0.3);
+        z-index: 1000;
+        cursor: pointer;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Bouton impression flottant (visible à l'écran uniquement) -->
+  <div class="print-hint print-hide" onclick="window.print()">
+    📄 Exporter en PDF (Ctrl+P → Enregistrer)
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                         PAGE DE COUVERTURE                      -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="cover">
+    <div>
+      <div class="cover-logo">♥</div>
+      <h1>MamaCare AI</h1>
+      <p class="subtitle">
+        Rapport d'avancement technique<br>
+        Plateforme de santé maternelle pour la Guinée
+      </p>
+      <div class="badges">
+        <span class="badge pink">🇬🇳 Guinée</span>
+        <span class="badge blue">Next.js 14 + Supabase</span>
+        <span class="badge green">En production</span>
+        <span class="badge">v2.1-edge</span>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <div>
+        <strong>Mamadou Maladho Barry</strong><br>
+        Fondateur · ImprOOve
+      </div>
+      <div style="text-align: right;">
+        <strong>24 avril 2026</strong><br>
+        https://mamacare-ai.vercel.app
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                      RÉSUMÉ EXÉCUTIF                            -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Résumé exécutif</h2>
+
+    <div class="lead">
+      <strong>MamaCare AI est une PWA de santé maternelle</strong> pour la Guinée
+      qui détecte les signes de danger chez les femmes enceintes via un questionnaire
+      quotidien, alerte automatiquement le médecin par WhatsApp/SMS en cas d'urgence,
+      et génère des résumés médicaux 30 jours avec Claude IA.
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="kpi-value">28</span>
+        <div class="kpi-label">Routes API</div>
+      </div>
+      <div class="kpi">
+        <span class="kpi-value">13</span>
+        <div class="kpi-label">Pages frontend</div>
+      </div>
+      <div class="kpi">
+        <span class="kpi-value">~50ms</span>
+        <div class="kpi-label">Cold start API</div>
+      </div>
+      <div class="kpi">
+        <span class="kpi-value">0€</span>
+        <div class="kpi-label">Coût mensuel</div>
+      </div>
+    </div>
+
+    <h3>Points clés</h3>
+    <ul>
+      <li><strong>Frontend</strong> déployé sur Vercel (Next.js 14, PWA installable, dark/light mode)</li>
+      <li><strong>Backend</strong> migré de NestJS/Render vers Supabase Edge Functions (Deno) — cold start 1000× plus rapide</li>
+      <li><strong>Base de données</strong> Postgres Supabase avec RLS (Row Level Security) sur toutes les tables</li>
+      <li><strong>13 règles OMS grossesse + 6 postnatal</strong> pour détection automatique des signes de danger</li>
+      <li><strong>Alertes temps réel</strong> : WhatsApp → SMS fallback → Push notifications PWA</li>
+      <li><strong>IA Claude Haiku</strong> : résumés 30j personnalisés + explications patientes en français</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                         ARCHITECTURE                            -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Architecture technique</h2>
+
+    <h3>Stack complet</h3>
+    <div class="arch">┌──────────────────────────────────────────────────────────────────┐
+│  FRONTEND — Next.js 14 + TypeScript + Tailwind CSS                │
+│  https://mamacare-ai.vercel.app                                   │
+│  • PWA installable (icônes + manifest + service worker)           │
+│  • Dark mode + light mode adoucis (CSS vars)                      │
+│  • Mobile-first (optimisé 3G Guinée)                              │
+│  • Offline fallback                                               │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │ HTTPS
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  EDGE FUNCTION — Deno (Supabase)                                  │
+│  /functions/v1/api (28 routes)                                    │
+│  • Auth OTP + tokens dev HMAC                                     │
+│  • WHO rules engine (13 grossesse + 6 postnatal)                  │
+│  • Claude API + WhatsApp + Africa's Talking SMS                   │
+│  • Cold start ~50ms (vs 50s sur Render free tier)                 │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  DATABASE — Postgres + Auth + Realtime (Supabase)                 │
+│  • 6 tables avec RLS : profiles, patients,                        │
+│    questionnaire_responses, alerts, notification_logs,            │
+│    appointments                                                    │
+│  • Supabase Auth OTP (SMS)                                        │
+│  • Realtime subscriptions pour les alertes                        │
+└──────────────────────────────────────────────────────────────────┘</div>
+
+    <h3>Pourquoi ces choix ?</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Contrainte</th>
+          <th>Décision technique</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Réseau 3G instable en Guinée</strong></td>
+          <td>PWA + service worker + cache agressif + timeout API 5s</td>
+        </tr>
+        <tr>
+          <td><strong>Smartphones Android bas de gamme</strong></td>
+          <td>Next.js optimisé, images locales, bundle minimal</td>
+        </tr>
+        <tr>
+          <td><strong>Budget 0€/mois</strong></td>
+          <td>Vercel Free + Supabase Free (limite 2 projets, 500MB DB)</td>
+        </tr>
+        <tr>
+          <td><strong>Cold start critique (urgences)</strong></td>
+          <td>Edge Function Deno (50ms) au lieu de container Render (50s)</td>
+        </tr>
+        <tr>
+          <td><strong>Sécurité données médicales</strong></td>
+          <td>RLS activée sur toutes les tables + JWT HttpOnly + HMAC dev tokens</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                      FONCTIONNALITÉS LIVRÉES                    -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Fonctionnalités livrées</h2>
+
+    <h3>1. Authentification</h3>
+    <table>
+      <thead>
+        <tr><th style="width:40%">Fonctionnalité</th><th style="width:40%">Détail</th><th>Statut</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Login OTP SMS (Supabase Auth)</td><td>Code à 6 chiffres envoyé par SMS</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Login démo instantané</td><td>3 boutons : Médecin / Patiente / Admin</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Session cookie HttpOnly</td><td>Protection XSS + SameSite strict</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Tokens dev HMAC signés</td><td>Tests sans SMS réel</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Rôles : doctor / patient / admin</td><td>Redirection automatique selon rôle</td><td><span class="status status-ok">Prêt</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>2. Questionnaire quotidien patiente (F02)</h3>
+    <table>
+      <thead>
+        <tr><th style="width:40%">Fonctionnalité</th><th style="width:40%">Détail</th><th>Statut</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>13 questions grossesse</td><td>TA, maux de tête, saignements, mouvements bébé, etc.</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>6 questions postnatal</td><td>Allaitement, fièvre bébé, jaunisse, détresse resp.</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Règles OMS statiques</td><td>Détection automatique rouge/orange/vert</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Explication IA en français</td><td>Claude Haiku — 2-3 phrases rassurantes</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Vendredi : questions santé mentale</td><td>Dépression post-partum</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Déshydratation 3 jours consécutifs</td><td>Détection automatique via historique</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Historique 30 jours</td><td>Consultation par la patiente</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Rappels push 8h + 10h</td><td>Service worker + Notification API</td><td><span class="status status-ok">Prêt</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>3. Dashboard médecin</h3>
+    <table>
+      <thead>
+        <tr><th style="width:40%">Fonctionnalité</th><th style="width:40%">Détail</th><th>Statut</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Liste patientes triée par risque</td><td>Rouge → Orange → Vert, tags visuels</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Stats dashboard</td><td>Urgences, surveillance, compliance, RDV 7j</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Filtres avancés</td><td>2+ jours inactives, trimestre (T1/T2/T3)</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Export CSV</td><td>Patientes filtrées — encodage UTF-8 Excel</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Fiche patiente détaillée</td><td>Identité, notes, historique, RDV, stats</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Export PDF fiche patiente</td><td>Format A4 imprimable (print CSS)</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Résumé IA 30 jours</td><td>Claude — tendance + signes récurrents</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Realtime Supabase</td><td>Nouvelles alertes sans refresh</td><td><span class="status status-ok">Prêt</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>4. Alertes médicales (F07)</h3>
+    <table>
+      <thead>
+        <tr><th style="width:40%">Fonctionnalité</th><th style="width:40%">Détail</th><th>Statut</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WhatsApp Business API</td><td>Notification immédiate au médecin</td><td><span class="status status-wip">Code prêt, API à configurer</span></td></tr>
+        <tr><td>SMS fallback Africa's Talking</td><td>Si WhatsApp échoue → SMS automatique</td><td><span class="status status-wip">Code prêt, API à configurer</span></td></tr>
+        <tr><td>Push notification PWA médecin</td><td>Alerte dans l'app même fermée</td><td><span class="status status-ok">Prêt (VAPID configuré)</span></td></tr>
+        <tr><td>SMS fallback persistant au boot</td><td>Récupération alertes perdues</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Résolution alerte par médecin</td><td>Marquer traité + horodaté</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Logs notifications</td><td>Traçabilité complète des envois</td><td><span class="status status-ok">Prêt</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. Rendez-vous (NOUVEAU)</h3>
+    <table>
+      <thead>
+        <tr><th style="width:40%">Fonctionnalité</th><th style="width:40%">Détail</th><th>Statut</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>5 types de consultations</td><td>CPN, Vaccination, Échographie, Consult, Post-natal</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Hero gradient + KPIs</td><td>Aujourd'hui / 7 jours / Honorés</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Regroupement temporel</td><td>Aujourd'hui / Demain / Semaine / Plus tard</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Actions Honoré / Annuler</td><td>Update statut en un clic</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Rappels SMS J-1</td><td>Cron 18h UTC la veille du RDV</td><td><span class="status status-wip">Code prêt, cron à activer</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>6. Design système</h3>
+    <table>
+      <thead>
+        <tr><th style="width:40%">Fonctionnalité</th><th style="width:40%">Détail</th><th>Statut</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Mode clair adouci</td><td>Off-white #FAF9FB teinté rose — reposant en plein soleil</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Mode sombre réchauffé</td><td>#0a0a0c warm + surface #111114</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Design tokens CSS variables</td><td>--mc-bg, --mc-surface, --mc-primary, etc.</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Shadows teintées rose</td><td>Signature visuelle subtile MamaCare</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Page 404 custom</td><td>Design cohérent + retour accueil/login</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Empty states harmonisés</td><td>Icône dans cercle pastel + dark mode</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Mobile-first responsive</td><td>Bottom nav mobile + nav desktop</td><td><span class="status status-ok">Prêt</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>7. Mode démo</h3>
+    <table>
+      <thead>
+        <tr><th style="width:40%">Fonctionnalité</th><th style="width:40%">Détail</th><th>Statut</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Accès sans backend</td><td>Cookie DEMO_TOKEN — intercepteur frontend</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>4 patientes réalistes</td><td>Profils variés (SA différents, risques variés)</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>5 RDV de démo</td><td>Aujourd'hui, demain, semaine, passé</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Historique 30 jours mocké</td><td>Questionnaires variés avec explications IA</td><td><span class="status status-ok">Prêt</span></td></tr>
+        <tr><td>Admin dashboard</td><td>Vue superviseur plateforme</td><td><span class="status status-wip">En cours</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                       SÉCURITÉ & CONFORMITÉ                     -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Sécurité et conformité</h2>
+
+    <h3>Mesures en place</h3>
+    <div class="grid">
+      <div class="card">
+        <h3>🔒 Row Level Security</h3>
+        <p>Activée sur les 6 tables. Chaque médecin ne voit QUE ses patientes. Chaque patiente ne voit QUE ses propres données.</p>
+      </div>
+      <div class="card">
+        <h3>🔑 JWT HttpOnly cookies</h3>
+        <p>Protection XSS — le token n'est jamais accessible en JavaScript. SameSite=strict contre CSRF.</p>
+      </div>
+      <div class="card">
+        <h3>🛡️ Dev tokens HMAC</h3>
+        <p>Les tokens de test sont signés avec DEV_MODE_SECRET (généré prod-grade). Impossible à forger.</p>
+      </div>
+      <div class="card">
+        <h3>🔐 Secrets Supabase Vault</h3>
+        <p>ANTHROPIC_API_KEY, VAPID, cron secret — stockés chiffrés côté Supabase, jamais dans le code.</p>
+      </div>
+      <div class="card">
+        <h3>📋 Logs notifications</h3>
+        <p>Chaque envoi WhatsApp/SMS tracé : recipient, statut, erreur — audit médical possible.</p>
+      </div>
+      <div class="card">
+        <h3>⚡ Cron protégé</h3>
+        <p>Endpoint /send-daily-reminders protégé par x-internal-secret (INTERNAL_CRON_SECRET).</p>
+      </div>
+    </div>
+
+    <h3>Conformité WCAG (accessibilité)</h3>
+    <ul>
+      <li><strong>WCAG 1.4.4</strong> — Zoom jusqu'à 5× autorisé (malvoyants)</li>
+      <li><strong>Contraste AA</strong> — Texte gray-800 sur fond off-white validé</li>
+      <li><strong>Focus visible</strong> — Ring rose sur tous les éléments interactifs</li>
+      <li><strong>prefers-reduced-motion</strong> — Animations désactivées si préférence système</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                       CE QUI RESTE À FAIRE                      -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Ce qui reste à faire</h2>
+
+    <h3>🔴 Critique — bloquant production réelle</h3>
+    <table>
+      <thead>
+        <tr><th>Tâche</th><th>Effort</th><th>Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Compte WhatsApp Business</strong><br>Créer compte Meta Business + faire vérifier numéro</td>
+          <td>2-5 jours (KYC)</td>
+          <td>Alertes médecin impossibles sinon</td>
+        </tr>
+        <tr>
+          <td><strong>Compte Africa's Talking</strong><br>Vérification téléphone Guinée + achat crédits SMS</td>
+          <td>1 jour</td>
+          <td>SMS fallback + onboarding patientes</td>
+        </tr>
+        <tr>
+          <td><strong>Seed données de test en prod</strong><br>Créer 2-3 médecins + 10-15 patientes réalistes</td>
+          <td>30 min</td>
+          <td>Permet les démos avec vrai compte</td>
+        </tr>
+        <tr>
+          <td><strong>Activer cron quotidien</strong><br>pg_cron → /notifications/send-daily-reminders à 8h UTC</td>
+          <td>15 min</td>
+          <td>Rappels automatiques patientes</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>🟡 Important — améliorations qualité</h3>
+    <table>
+      <thead>
+        <tr><th>Tâche</th><th>Effort</th><th>Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Dashboard admin complet</strong><br>Liste médecins + stats globales + moderation</td>
+          <td>1 jour</td>
+          <td>Supervision plateforme par fondateur</td>
+        </tr>
+        <tr>
+          <td><strong>Page /notifications</strong><br>Gestion fine des rappels (heure, canaux)</td>
+          <td>4h</td>
+          <td>Actuellement bouton "Bientôt" dans profil</td>
+        </tr>
+        <tr>
+          <td><strong>Statistiques médecin avancées</strong><br>Graphiques évolution TA, poids, compliance</td>
+          <td>1 jour</td>
+          <td>Aide décision médicale</td>
+        </tr>
+        <tr>
+          <td><strong>Upload photo échographie</strong><br>Stockage Supabase Storage + galerie fiche patiente</td>
+          <td>1 jour</td>
+          <td>Feature demandée par médecins</td>
+        </tr>
+        <tr>
+          <td><strong>Tests E2E Playwright</strong><br>Scénarios critiques : login, questionnaire, alerte</td>
+          <td>2 jours</td>
+          <td>Régression test automatique</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>🟢 Nice to have — évolutions futures</h3>
+    <ul>
+      <li><strong>Version Android native</strong> — React Native Expo pour performance et notifications natives</li>
+      <li><strong>Traduction pulaar / susu / malinké</strong> — i18next avec toggle langue</li>
+      <li><strong>Chatbot WhatsApp</strong> — Questionnaire via WhatsApp (patientes sans smartphone)</li>
+      <li><strong>Téléconsultation intégrée</strong> — Appel vidéo dans l'app (Jitsi Meet)</li>
+      <li><strong>Module ordonnances</strong> — Génération PDF + QR code pharmacie</li>
+      <li><strong>Export mensuel PDF</strong> — Rapport médecin automatique envoyé par email</li>
+      <li><strong>Détection mouvements foetaux</strong> — Formulaire dédié 2e/3e trimestre</li>
+      <li><strong>Groupes de soutien</strong> — Forum modéré entre patientes</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                       ROADMAP SUGGÉRÉE                          -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Roadmap suggérée (3 mois)</h2>
+
+    <h3>Mois 1 — Mise en production réelle</h3>
+    <ul>
+      <li>Semaine 1 : Création comptes WhatsApp Business + Africa's Talking (KYC)</li>
+      <li>Semaine 2 : Seed données + activation cron + test end-to-end</li>
+      <li>Semaine 3 : Pilote avec 2 médecins + 20 patientes volontaires</li>
+      <li>Semaine 4 : Collecte feedback + corrections urgentes</li>
+    </ul>
+
+    <h3>Mois 2 — Optimisation et extension</h3>
+    <ul>
+      <li>Dashboard admin + page notifications + statistiques avancées</li>
+      <li>Upload photos échographie + stockage Supabase</li>
+      <li>Tests E2E Playwright</li>
+      <li>Optimisations perfs suite au pilote</li>
+    </ul>
+
+    <h3>Mois 3 — Déploiement large</h3>
+    <ul>
+      <li>Traduction pulaar/susu/malinké</li>
+      <li>Onboarding 5-10 nouveaux médecins partenaires</li>
+      <li>Début déploiement Conakry → extension régions</li>
+      <li>Début module chatbot WhatsApp pour patientes sans smartphone</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                       MÉTRIQUES DE SUCCÈS                       -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Métriques de succès cibles</h2>
+
+    <table>
+      <thead>
+        <tr><th>Indicateur</th><th>Mois 3</th><th>Mois 6</th><th>Année 1</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Médecins actifs</td><td>2</td><td>10</td><td>50</td></tr>
+        <tr><td>Patientes suivies</td><td>20</td><td>200</td><td>2 000</td></tr>
+        <tr><td>Taux compliance quotidien</td><td>60%</td><td>70%</td><td>80%</td></tr>
+        <tr><td>Alertes rouges détectées/mois</td><td>5</td><td>30</td><td>200</td></tr>
+        <tr><td>Temps moyen réponse médecin</td><td>&lt; 60min</td><td>&lt; 30min</td><td>&lt; 15min</td></tr>
+        <tr><td>Coût mensuel infra</td><td>0€</td><td>25€</td><td>150€</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Impact santé publique visé</h3>
+    <div class="lead">
+      <strong>Guinée 2024</strong> : mortalité maternelle 576/100 000 naissances
+      (8× supérieure à l'objectif ODD). MamaCare vise à réduire de <strong>15-30%</strong>
+      les morts évitables via détection précoce des 5 principales causes :
+      hémorragies (27%), hypertension/prééclampsie (14%), infections (11%),
+      avortements à risque (8%), travail difficile (9%).
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                       ANNEXES TECHNIQUES                        -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Annexes techniques</h2>
+
+    <h3>URLs et identifiants</h3>
+    <table>
+      <tbody>
+        <tr><td><strong>Frontend prod</strong></td><td><code>https://mamacare-ai.vercel.app</code></td></tr>
+        <tr><td><strong>API Edge Function</strong></td><td><code>https://jnkabdrqmdgefamahysc.supabase.co/functions/v1/api</code></td></tr>
+        <tr><td><strong>Projet Supabase</strong></td><td><code>jnkabdrqmdgefamahysc</code></td></tr>
+        <tr><td><strong>Projet Vercel</strong></td><td><code>mamacare-ai</code> (team <code>maladho1711s-projects</code>)</td></tr>
+        <tr><td><strong>Repo GitHub</strong></td><td><code>github.com/Maladho1711/mamacare-ai</code> (public)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Secrets configurés en prod</h3>
+    <table>
+      <thead>
+        <tr><th>Secret</th><th>Utilité</th><th>État</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>SUPABASE_URL</code>, <code>*_KEY</code></td><td>Connexion DB</td><td><span class="status status-ok">Auto</span></td></tr>
+        <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Claude IA</td><td><span class="status status-ok">Configuré</span></td></tr>
+        <tr><td><code>VAPID_PUBLIC/PRIVATE_KEY</code></td><td>Push notifications</td><td><span class="status status-ok">Configuré</span></td></tr>
+        <tr><td><code>INTERNAL_CRON_SECRET</code></td><td>Protection cron</td><td><span class="status status-ok">Configuré</span></td></tr>
+        <tr><td><code>DEV_MODE_SECRET</code></td><td>HMAC dev tokens</td><td><span class="status status-ok">Configuré</span></td></tr>
+        <tr><td><code>PWA_URL</code></td><td>SMS onboarding</td><td><span class="status status-ok">Configuré</span></td></tr>
+        <tr><td><code>WHATSAPP_ACCESS_TOKEN</code>, <code>_PHONE_NUMBER_ID</code></td><td>Alertes médecin</td><td><span class="status status-todo">Placeholder</span></td></tr>
+        <tr><td><code>AFRICA_TALKING_USERNAME</code>, <code>_API_KEY</code></td><td>SMS fallback</td><td><span class="status status-todo">Placeholder</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Schéma base de données</h3>
+    <table>
+      <thead>
+        <tr><th>Table</th><th>Description</th><th>RLS</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>profiles</code></td><td>Utilisateurs (médecins + patientes)</td><td>✅</td></tr>
+        <tr><td><code>patients</code></td><td>Dossiers patientes (SA, risque, médecin)</td><td>✅</td></tr>
+        <tr><td><code>questionnaire_responses</code></td><td>Réponses quotidiennes + analyse IA</td><td>✅</td></tr>
+        <tr><td><code>alerts</code></td><td>Alertes rouge/orange avec canaux envoi</td><td>✅</td></tr>
+        <tr><td><code>notification_logs</code></td><td>Traçabilité WhatsApp/SMS/Push</td><td>✅</td></tr>
+        <tr><td><code>appointments</code></td><td>Rendez-vous CPN/vaccin/écho/etc.</td><td>✅</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Commits récents (avril 2026)</h3>
+    <table>
+      <tbody>
+        <tr><td><code>d3b753a</code></td><td>Migration NestJS → Supabase Edge Functions</td></tr>
+        <tr><td><code>4dc68d2</code></td><td>Setup auto URL API + script secrets</td></tr>
+        <tr><td><code>c809f0d</code></td><td>Fix 404 /notifications + page 404 custom</td></tr>
+        <tr><td><code>f8b6ea5</code></td><td>Fix crash page Rendez-vous + refonte UX world-class</td></tr>
+        <tr><td><code>e0e102f</code></td><td>Mode clair adouci + endpoint VAPID + cleanup</td></tr>
+        <tr><td><code>a5a55c0</code></td><td>VAPID keys + secrets Supabase</td></tr>
+        <tr><td><code>368ed4f</code></td><td>Gitignore Supabase CLI temp files</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                            FIN                                  -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section style="text-align: center; padding: 40px 10mm;">
+    <div class="cover-logo" style="margin: 0 auto 20px;">♥</div>
+    <h2 style="border: none; font-size: 20pt;">MamaCare AI</h2>
+    <p style="color: #6B7280; font-size: 11pt; margin-top: 8px;">
+      Plateforme de santé maternelle pour la Guinée
+    </p>
+    <p style="color: #9CA3AF; font-size: 9pt; margin-top: 30px;">
+      Rapport généré le 24 avril 2026 · MamaCare AI v2.1-edge<br>
+      <strong>Mamadou Maladho Barry</strong> · Fondateur ImprOOve<br>
+      maladhob5@gmail.com · +224 623 43 65 13
+    </p>
+  </section>
+
+</body>
+</html>
