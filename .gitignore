@@ -43,3 +43,8 @@ coverage/
 .supabase/
 
 .vercel
+
+# Supabase CLI temp files
+supabase/.temp/
+supabase/.branches/
+supabase/supabase/
