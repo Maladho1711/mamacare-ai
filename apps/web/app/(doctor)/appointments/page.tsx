@@ -19,6 +19,7 @@ import Input from '@/components/ui/Input';
 import EmptyState from '@/components/ui/EmptyState';
 import FilterChip from '@/components/ui/FilterChip';
 import { useToast } from '@/components/ui/Toast';
+import AppointmentCalendar, { type CalendarAppointment } from '@/components/doctor/AppointmentCalendar';
 
 interface Appointment {
   id: string;
@@ -39,6 +40,7 @@ interface PatientRow {
 }
 
 type FilterKey = 'upcoming' | 'past' | 'all';
+type ViewMode = 'list' | 'calendar';
 
 const TYPE_LABEL: Record<Appointment['type'], string> = {
   cpn: 'CPN',
@@ -121,6 +123,7 @@ export default function AppointmentsPage() {
   const [patients, setPatients] = useState<PatientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>('upcoming');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [modalOpen, setModalOpen] = useState(false);
 
   const [form, setForm] = useState({
@@ -312,27 +315,75 @@ export default function AppointmentsPage() {
         </Button>
       </div>
 
-      {/* Filtres */}
-      <div className="flex gap-2">
-        <FilterChip
-          label="À venir"
-          active={filter ==='upcoming'}
-          onClick={() => setFilter('upcoming')}
-        />
-        <FilterChip
-          label="Passés"
-          active={filter ==='past'}
-          onClick={() => setFilter('past')}
-        />
-        <FilterChip
-          label="Tous"
-          active={filter ==='all'}
-          onClick={() => setFilter('all')}
-        />
+      {/* Toggle vue Liste/Calendrier + Filtres */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex gap-2">
+          <FilterChip
+            label="À venir"
+            active={filter === 'upcoming' && viewMode === 'list'}
+            onClick={() => { setFilter('upcoming'); setViewMode('list'); }}
+          />
+          <FilterChip
+            label="Passés"
+            active={filter === 'past' && viewMode === 'list'}
+            onClick={() => { setFilter('past'); setViewMode('list'); }}
+          />
+          <FilterChip
+            label="Tous"
+            active={filter === 'all' && viewMode === 'list'}
+            onClick={() => { setFilter('all'); setViewMode('list'); }}
+          />
+        </div>
+        {/* Toggle Liste / Calendrier */}
+        <div className="inline-flex rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5">
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+              viewMode === 'list'
+                ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            📋 Liste
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('calendar')}
+            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+              viewMode === 'calendar'
+                ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            📅 Calendrier
+          </button>
+        </div>
       </div>
 
-      {/* Liste */}
-      {loading ? (
+      {/* Vue calendrier */}
+      {viewMode === 'calendar' && (
+        <AppointmentCalendar
+          appointments={appointments.map((a) => ({
+            id: a.id,
+            scheduledAt: a.scheduledAt,
+            title: a.title,
+            type: a.type,
+            status: a.status,
+            patientName: patientName(a.patientId),
+          } satisfies CalendarAppointment))}
+          onDayClick={(_, dayAppts) => {
+            if (dayAppts.length > 0) {
+              // Scroll vers la liste filtrée sur ce jour (fallback : switch to list)
+              setViewMode('list');
+              setFilter('all');
+            }
+          }}
+        />
+      )}
+
+      {/* Liste (uniquement si viewMode=list) */}
+      {viewMode === 'list' && (loading ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
             <div
@@ -453,7 +504,7 @@ export default function AppointmentsPage() {
             </section>
           ))}
         </div>
-      )}
+      ))}
 
       {/* Modale création */}
       <Modal

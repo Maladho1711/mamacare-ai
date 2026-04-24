@@ -39,11 +39,11 @@ export function useSession(opts: UseSessionOptions = {}): UseSessionReturn {
 
     if (opts.requireRole && found.role !== opts.requireRole) {
       // Exception : l'admin a accès à toutes les pages (dashboard médecin, etc.)
-      if (found.role !== 'admin') {
+      const role: string = found.role;
+      if (role !== 'admin') {
         // Mauvais rôle → rediriger vers la bonne page
         const target =
-          found.role === 'doctor' ? '/dashboard' :
-          found.role === 'admin' ? '/admin' :
+          role === 'doctor' ? '/dashboard' :
           '/questionnaire';
         router.replace(target);
         return;

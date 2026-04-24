@@ -8,6 +8,7 @@ import AlertBadge from '@/components/doctor/AlertBadge';
 import Spinner from '@/components/ui/Spinner';
 import Modal from '@/components/ui/Modal';
 import SkeletonPatientDetail from '@/components/doctor/SkeletonPatientDetail';
+import PregnancyTimeline from '@/components/doctor/PregnancyTimeline';
 import { useToast } from '@/components/ui/Toast';
 
 // --- Types --------------------------------------------------------------------
@@ -425,6 +426,11 @@ export default function PatientDetailPage() {
             />
             <InfoItem label="Terme prévu" value={fmtDate(patient.expected_term)} />
           </div>
+
+          {/* -- Parcours de grossesse (timeline OMS) -- */}
+          {patient.status !== 'postnatal' && (
+            <PregnancyTimeline pregnancyStart={patient.pregnancy_start} />
+          )}
 
           {/* -- Notes cliniques — édition inline -- */}
           <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
