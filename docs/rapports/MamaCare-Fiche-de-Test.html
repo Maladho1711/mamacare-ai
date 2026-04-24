@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>MamaCare AI — Fiche de test</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Inter, sans-serif;
+      font-size: 10pt;
+      line-height: 1.4;
+      color: #1F2937;
+      background: #FFFFFF;
+    }
+
+    /* ─── Header ──────────────────────────────────────────────────── */
+    header {
+      border-bottom: 3px solid #E91E8C;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    header h1 {
+      font-size: 18pt;
+      color: #E91E8C;
+      font-weight: 800;
+    }
+    header h1 small {
+      font-size: 10pt;
+      color: #6B7280;
+      font-weight: 500;
+      display: block;
+      margin-top: 2px;
+    }
+    .meta-box {
+      font-size: 8.5pt;
+      color: #6B7280;
+      text-align: right;
+    }
+
+    /* ─── Info block testeur ──────────────────────────────────────── */
+    .tester-info {
+      background: #FAF9FB;
+      border: 1px solid #F1EDF2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px 14px;
+      font-size: 9pt;
+    }
+    .tester-info label {
+      color: #6B7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 7.5pt;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .tester-info .field {
+      border-bottom: 1px solid #D1D5DB;
+      min-height: 16px;
+      padding: 2px 2px 4px;
+    }
+
+    /* ─── Section ─────────────────────────────────────────────────── */
+    section {
+      margin-bottom: 16px;
+      page-break-inside: avoid;
+    }
+    h2 {
+      font-size: 12pt;
+      color: #1F2937;
+      font-weight: 800;
+      background: #FDE8F3;
+      padding: 6px 12px;
+      border-radius: 6px 6px 0 0;
+      border-left: 4px solid #E91E8C;
+      margin-bottom: 0;
+    }
+    .intro {
+      font-size: 8.5pt;
+      color: #6B7280;
+      padding: 6px 12px;
+      background: #FAF9FB;
+      border: 1px solid #F1EDF2;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      margin-bottom: 8px;
+    }
+
+    /* ─── Test case ───────────────────────────────────────────────── */
+    .test {
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .test-header {
+      background: #F9FAFB;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 9.5pt;
+    }
+    .test-id {
+      font-weight: 700;
+      color: #E91E8C;
+      font-family: 'Courier New', monospace;
+    }
+    .test-title {
+      font-weight: 600;
+      color: #1F2937;
+      flex: 1;
+      margin-left: 8px;
+    }
+    .test-prio {
+      font-size: 7.5pt;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .prio-critical { background: #FEE2E2; color: #991B1B; }
+    .prio-high     { background: #FEF3C7; color: #92400E; }
+    .prio-medium   { background: #DBEAFE; color: #1E40AF; }
+
+    .test-body {
+      padding: 8px 10px;
+      font-size: 9pt;
+    }
+    .test-steps {
+      margin-bottom: 6px;
+    }
+    .test-steps ol {
+      margin-left: 18px;
+      color: #374151;
+    }
+    .test-steps li {
+      margin-bottom: 2px;
+    }
+    .expected {
+      background: #F0FDF4;
+      border-left: 3px solid #16A34A;
+      padding: 5px 8px;
+      font-size: 8.5pt;
+      border-radius: 0 4px 4px 0;
+      color: #166534;
+    }
+    .expected strong {
+      color: #14532D;
+      text-transform: uppercase;
+      font-size: 7.5pt;
+      letter-spacing: 0.5px;
+    }
+
+    .result-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed #E5E7EB;
+    }
+    .check-group {
+      display: flex;
+      gap: 10px;
+      font-size: 8.5pt;
+    }
+    .checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .box {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid #1F2937;
+      border-radius: 2px;
+    }
+    .box.ok { border-color: #16A34A; }
+    .box.ko { border-color: #DC2626; }
+    .notes-line {
+      border-bottom: 1px solid #D1D5DB;
+      height: 14px;
+      font-size: 8.5pt;
+      color: #6B7280;
+    }
+    .time-box {
+      border: 1px solid #D1D5DB;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 8.5pt;
+      color: #6B7280;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    /* ─── Tables bug report ───────────────────────────────────────── */
+    .bug-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5pt;
+      margin-top: 6px;
+    }
+    .bug-table th {
+      background: #E91E8C;
+      color: white;
+      padding: 6px 8px;
+      font-size: 8pt;
+      text-align: left;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .bug-table td {
+      border: 1px solid #E5E7EB;
+      padding: 6px 8px;
+      height: 34px;
+      vertical-align: top;
+    }
+
+    /* ─── Signature / validation ──────────────────────────────────── */
+    .footer-sign {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 2px solid #E91E8C;
+      font-size: 9pt;
+    }
+    .sign-box {
+      border: 1px dashed #9CA3AF;
+      padding: 8px 12px;
+      border-radius: 6px;
+      min-height: 70px;
+    }
+    .sign-box label {
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      color: #6B7280;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Print ───────────────────────────────────────────────────── */
+    @media print {
+      .no-print { display: none; }
+    }
+    @media screen {
+      body { max-width: 210mm; margin: 0 auto; padding: 10mm; background: #F1EDF2; }
+      .page { background: white; padding: 14mm; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+      .print-hint {
+        position: fixed; top: 20px; right: 20px;
+        background: #E91E8C; color: white;
+        padding: 12px 18px; border-radius: 10px;
+        font-size: 11pt; font-weight: 600;
+        cursor: pointer; z-index: 100;
+        box-shadow: 0 4px 14px rgba(233, 30, 140, 0.3);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-hint no-print" onclick="window.print()">📄 Imprimer / PDF</div>
+
+<div class="page">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                            HEADER                               -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <header>
+    <h1>
+      ♥ MamaCare AI
+      <small>Fiche de test — validation des fonctionnalités</small>
+    </h1>
+    <div class="meta-box">
+      <strong>Version</strong> 2.1-edge<br>
+      <strong>URL</strong> mamacare-ai.vercel.app<br>
+      <strong>Édition</strong> 24 avril 2026
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                      INFO TESTEUR                               -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="tester-info">
+    <div>
+      <label>Nom du testeur</label>
+      <div class="field"></div>
+    </div>
+    <div>
+      <label>Rôle / fonction</label>
+      <div class="field"></div>
+    </div>
+    <div>
+      <label>Date du test</label>
+      <div class="field"></div>
+    </div>
+    <div>
+      <label>Navigateur + version</label>
+      <div class="field"></div>
+    </div>
+    <div>
+      <label>Appareil / OS</label>
+      <div class="field"></div>
+    </div>
+    <div>
+      <label>Durée totale</label>
+      <div class="field"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                    INSTRUCTIONS                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>📋 Consignes</h2>
+    <div class="intro">
+      Teste chaque scénario dans l'ordre. Pour chaque cas : <strong>coche ✓ OK</strong>
+      si le résultat attendu est obtenu, ou <strong>✗ KO</strong> et écris un
+      commentaire dans la zone de droite. Note le temps passé. Les bugs
+      rencontrés vont dans le tableau en bas de document.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--              PARTIE 1 : ACCÈS ET DÉMO                           -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>1. Accès et mode démo</h2>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T01</span>
+        <span class="test-title">Chargement de la landing page</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Ouvrir <strong>https://mamacare-ai.vercel.app</strong></li>
+            <li>Attendre le chargement complet</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Page d'accueil avec titre "MamaCare AI", bouton
+          "Se connecter", chargement &lt; 3 secondes sur 4G Guinée.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T02</span>
+        <span class="test-title">Connexion démo médecin (Dr. Maladho Barry)</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Aller sur /login</li>
+            <li>Cliquer le bouton bleu <strong>"Dr. Maladho Barry"</strong></li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Redirection vers /dashboard, affichage des 4
+          patientes démo triées par risque (rouge &gt; orange &gt; vert).
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T03</span>
+        <span class="test-title">Connexion démo patiente (Aïssatou Diallo)</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Se déconnecter (icône en haut à droite)</li>
+            <li>Cliquer le bouton rose <strong>"Aïssatou Diallo"</strong></li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Redirection vers /questionnaire, header rose
+          avec "SA 24" affichée.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--              PARTIE 2 : QUESTIONNAIRE PATIENTE                  -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>2. Questionnaire quotidien (patiente)</h2>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T04</span>
+        <span class="test-title">Remplir questionnaire — alerte VERTE</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Connecté en patiente, aller sur /questionnaire</li>
+            <li>Répondre <strong>NON</strong> à toutes les questions</li>
+            <li>Soumettre</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Page résultat avec badge VERT, message rassurant
+          de l'IA Claude en français, pas d'alerte déclenchée.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T05</span>
+        <span class="test-title">Alerte ROUGE — saignements vaginaux</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Retour à /questionnaire (ou se reconnecter en patiente)</li>
+            <li>Répondre <strong>OUI</strong> à Q4 "Avez-vous eu des saignements ?"</li>
+            <li>Soumettre</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Badge ROUGE avec animation shake, message d'urgence,
+          mention "URGENCE — contactez votre médecin immédiatement".
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T06</span>
+        <span class="test-title">Historique 30 jours (patiente)</span>
+        <span class="test-prio prio-high">Élevée</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Aller sur /history</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Liste des questionnaires soumis triés par date,
+          badges colorés rouge/orange/vert, explications IA visibles.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--              PARTIE 3 : DASHBOARD MÉDECIN                       -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>3. Dashboard médecin</h2>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T07</span>
+        <span class="test-title">Statistiques et tri par risque</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Connecté en médecin, /dashboard</li>
+            <li>Observer les 4 StatCards en haut (Total, Urgences, À surveiller, Sans check)</li>
+            <li>Cliquer sur "Urgences"</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> StatCards affichent les bons chiffres.
+          Clic sur "Urgences" filtre la liste aux patientes rouges uniquement.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T08</span>
+        <span class="test-title">Filtres avancés (inactives + trimestre)</span>
+        <span class="test-prio prio-high">Élevée</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Cliquer "2+ jours" dans la barre "Inactives"</li>
+            <li>Cliquer "T2 · 14-27 SA" dans la barre "Trimestre"</li>
+            <li>Cliquer "Tout effacer"</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Les filtres se cumulent, badges des filtres actifs
+          apparaissent, le bouton "Tout effacer" réinitialise tout.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T09</span>
+        <span class="test-title">Export CSV</span>
+        <span class="test-prio prio-medium">Moyenne</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Cliquer le bouton <strong>CSV</strong> en haut à droite de la table</li>
+            <li>Ouvrir le fichier téléchargé dans Excel</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Fichier <code>mamacare_patientes_YYYY-MM-DD.csv</code>,
+          6 colonnes (Nom, Téléphone, SA, Trimestre, Dernier check, Risque),
+          accents corrects (encodage UTF-8 BOM).
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--              PARTIE 4 : FICHE PATIENTE                          -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>4. Fiche patiente détaillée</h2>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T10</span>
+        <span class="test-title">Ouverture fiche + timeline grossesse</span>
+        <span class="test-prio prio-high">Élevée</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Depuis /dashboard, cliquer sur <strong>Aïssatou Diallo</strong></li>
+            <li>Scroll pour voir toute la fiche</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Identité, risque, SA actuelle, notes cliniques.
+          Bloc <strong>"Parcours de grossesse"</strong> avec barre de progression rose,
+          12 étapes OMS (CPN 1-7, échos T1/T2/T3, vaccin VAT, accouchement), étape
+          actuelle avec badge "En cours" animé.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T11</span>
+        <span class="test-title">Édition note médicale</span>
+        <span class="test-prio prio-high">Élevée</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Dans la fiche, cliquer sur la zone "Notes cliniques"</li>
+            <li>Éditer le texte et valider</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Édition inline, sauvegarde automatique,
+          toast de confirmation.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T12</span>
+        <span class="test-title">Export PDF fiche patiente</span>
+        <span class="test-prio prio-medium">Moyenne</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Cliquer l'icône 🖨️ en haut de la fiche</li>
+            <li>Nouvelle page /patients/[id]/print s'ouvre</li>
+            <li>Ctrl+P → Enregistrer au format PDF</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Page A4 imprimable : identité + stats 30j +
+          historique + RDV + notes + résumé IA.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T13</span>
+        <span class="test-title">Archivage patiente</span>
+        <span class="test-prio prio-medium">Moyenne</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Dans la fiche, cliquer "Archiver cette patiente"</li>
+            <li>Choisir un motif dans la modale + confirmer</li>
+            <li>Retourner au dashboard</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Patiente disparaît de la liste active. Toast
+          "Patiente archivée". Motif enregistré visible sur la fiche.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--              PARTIE 5 : RENDEZ-VOUS                             -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>5. Rendez-vous</h2>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T14</span>
+        <span class="test-title">Vue liste avec regroupement temporel</span>
+        <span class="test-prio prio-high">Élevée</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Aller sur /appointments</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Hero rose avec 3 KPIs (Aujourd'hui/7j/Honorés).
+          Liste groupée : "🔥 Aujourd'hui" / "⏰ Demain" / "📅 Cette semaine" /
+          "🗓️ Plus tard". Icônes par type de consultation.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T15</span>
+        <span class="test-title">Bascule vue Calendrier mensuelle</span>
+        <span class="test-prio prio-high">Élevée</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Cliquer le bouton <strong>📅 Calendrier</strong> en haut à droite</li>
+            <li>Naviguer mois précédent / suivant avec les flèches</li>
+            <li>Cliquer "Aujourd'hui"</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Grille 6×7 style Google Calendar. Pastilles
+          colorées sur les jours avec RDV. Jour courant en rose. Légende couleur
+          en bas (CPN, Vaccin, Écho, Consult, Post-natal).
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T16</span>
+        <span class="test-title">Créer un rendez-vous</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Cliquer "+ Nouveau"</li>
+            <li>Sélectionner patiente + type + titre + date future</li>
+            <li>Valider</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Modale de création, validation champs requis,
+          toast "Rendez-vous créé", apparition dans la liste.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--              PARTIE 6 : ALERTES                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>6. Alertes médicales</h2>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T17</span>
+        <span class="test-title">Liste et filtres alertes</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Aller sur /alerts</li>
+            <li>Tester les filtres Toutes / Rouges / Oranges / Résolues</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Liste chronologique, nom patiente, message,
+          badge couleur, canal d'envoi (📱 WhatsApp, 💬 SMS).
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T18</span>
+        <span class="test-title">Résolution alerte</span>
+        <span class="test-prio prio-high">Élevée</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Cliquer "Marquer résolu" sur une alerte</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Alerte passe en "Résolue", disparaît du
+          compteur, badge rose à côté.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--              PARTIE 7 : UI/UX TRANSVERSAL                       -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>7. UI / UX transversal</h2>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T19</span>
+        <span class="test-title">Bascule mode clair / sombre</span>
+        <span class="test-prio prio-medium">Moyenne</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Cliquer l'icône ☀️/🌙 en haut à droite du header</li>
+            <li>Naviguer entre plusieurs pages</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Mode clair = fond off-white rosé doux (pas blanc pur).
+          Mode sombre = fond warm. Cohérence sur toutes les pages.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T20</span>
+        <span class="test-title">Responsive mobile (375px)</span>
+        <span class="test-prio prio-critical">Critique</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Ouvrir DevTools (F12), toggle device mode</li>
+            <li>Choisir iPhone SE (375×667)</li>
+            <li>Naviguer entre toutes les pages</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Bottom nav mobile présente, pas de
+          scroll horizontal, boutons assez gros pour doigts, texte lisible.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T21</span>
+        <span class="test-title">Page 404 personnalisée</span>
+        <span class="test-prio prio-medium">Moyenne</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Aller sur une URL inexistante (ex: /xxx)</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Page 404 custom rose MamaCare avec boutons
+          "Retour accueil" et "Se connecter".
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test">
+      <div class="test-header">
+        <span class="test-id">T22</span>
+        <span class="test-title">Installation PWA</span>
+        <span class="test-prio prio-medium">Moyenne</span>
+      </div>
+      <div class="test-body">
+        <div class="test-steps">
+          <ol>
+            <li>Sur Chrome mobile, cliquer "Ajouter à l'écran d'accueil"</li>
+            <li>Lancer l'app depuis l'icône sur l'écran d'accueil</li>
+          </ol>
+        </div>
+        <div class="expected">
+          <strong>Attendu :</strong> Icône rose MamaCare installée, app se lance
+          en plein écran sans barre navigateur.
+        </div>
+        <div class="result-row">
+          <div class="check-group">
+            <span class="checkbox"><span class="box ok"></span> OK</span>
+            <span class="checkbox"><span class="box ko"></span> KO</span>
+          </div>
+          <div class="notes-line"></div>
+          <div class="time-box">___ s</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                  RAPPORT DE BUGS                                -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section style="page-break-before: always;">
+    <h2>🐛 Rapport de bugs rencontrés</h2>
+
+    <table class="bug-table">
+      <thead>
+        <tr>
+          <th style="width: 8%;">ID Test</th>
+          <th style="width: 12%;">Sévérité</th>
+          <th style="width: 45%;">Description du bug</th>
+          <th style="width: 25%;">Reproductibilité / étapes</th>
+          <th style="width: 10%;">Screenshot</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top: 10px; font-size: 8pt; color: #6B7280;">
+      <strong>Légende sévérité :</strong>
+      🔴 <strong>Bloquant</strong> (empêche l'utilisation) ·
+      🟡 <strong>Majeur</strong> (feature KO) ·
+      🔵 <strong>Mineur</strong> (cosmétique / UX) ·
+      ⚪ <strong>Suggestion</strong> (amélioration future)
+    </p>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                    SIGNATURE                                    -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>✍️ Validation</h2>
+
+    <div class="footer-sign">
+      <div class="sign-box">
+        <label>Testeur</label>
+        <p style="margin-top: 6px; font-size: 9pt;">
+          Nom : _______________________________<br><br>
+          Signature :
+        </p>
+      </div>
+      <div class="sign-box">
+        <label>Validation technique (dev)</label>
+        <p style="margin-top: 6px; font-size: 9pt;">
+          Mamadou Maladho Barry<br><br>
+          Date : _____ / _____ / 2026
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top: 16px; font-size: 8pt; color: #9CA3AF; text-align: center;">
+      MamaCare AI v2.1-edge · Rapport de test à conserver pour traçabilité qualité<br>
+      contact : maladhob5@gmail.com · mamacare-ai.vercel.app
+    </p>
+  </section>
+
+</div>
+
+</body>
+</html>
