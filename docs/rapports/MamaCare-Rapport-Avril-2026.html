@@ -352,7 +352,7 @@
     <div class="cover-footer">
       <div>
         <strong>Mamadou Maladho Barry</strong><br>
-        Fondateur · ImprOOve
+        Fondateur & Lead Developer
       </div>
       <div style="text-align: right;">
         <strong>24 avril 2026</strong><br>
@@ -716,30 +716,50 @@
   <!--                       ROADMAP SUGGÉRÉE                          -->
   <!-- ═══════════════════════════════════════════════════════════════ -->
   <section>
-    <h2>Roadmap suggérée (3 mois)</h2>
+    <h2>Roadmap suggérée (1 semaine avec Claude Code)</h2>
 
-    <h3>Mois 1 — Mise en production réelle</h3>
+    <div class="lead">
+      <strong>Workflow accéléré IA</strong> — grâce à l'orchestration Claude Code,
+      ce qui prend classiquement 3 mois d'équipe tient en <strong>5 jours solo</strong>.
+      Les agents spécialisés (backend, frontend, designer, debugger) parallélisent
+      le travail au lieu d'avancer séquentiellement.
+    </div>
+
+    <h3>Jour 1 — Mise en production réelle</h3>
     <ul>
-      <li>Semaine 1 : Création comptes WhatsApp Business + Africa's Talking (KYC)</li>
-      <li>Semaine 2 : Seed données + activation cron + test end-to-end</li>
-      <li>Semaine 3 : Pilote avec 2 médecins + 20 patientes volontaires</li>
-      <li>Semaine 4 : Collecte feedback + corrections urgentes</li>
+      <li>Création comptes WhatsApp Business + Africa's Talking (les vérifications tournent en arrière-plan)</li>
+      <li>Seed données réalistes en base (4 médecins + 15 patientes + historique 30j)</li>
+      <li>Activation cron quotidien Supabase (pg_cron 8h UTC)</li>
+      <li>Test end-to-end complet : login, questionnaire, alerte, WhatsApp, SMS</li>
     </ul>
 
-    <h3>Mois 2 — Optimisation et extension</h3>
+    <h3>Jour 2 — Dashboard admin + page notifications</h3>
     <ul>
-      <li>Dashboard admin + page notifications + statistiques avancées</li>
-      <li>Upload photos échographie + stockage Supabase</li>
-      <li>Tests E2E Playwright</li>
-      <li>Optimisations perfs suite au pilote</li>
+      <li>Dashboard admin complet (liste médecins, stats globales, modération)</li>
+      <li>Page /notifications fine (heures personnalisées, canaux par patiente)</li>
+      <li>Statistiques médecin avancées (graphiques évolution TA, poids, compliance)</li>
     </ul>
 
-    <h3>Mois 3 — Déploiement large</h3>
+    <h3>Jour 3 — Upload photos + tests E2E</h3>
     <ul>
-      <li>Traduction pulaar/susu/malinké</li>
-      <li>Onboarding 5-10 nouveaux médecins partenaires</li>
-      <li>Début déploiement Conakry → extension régions</li>
-      <li>Début module chatbot WhatsApp pour patientes sans smartphone</li>
+      <li>Upload photos échographie via Supabase Storage + galerie fiche patiente</li>
+      <li>Tests E2E Playwright (login, questionnaire, alerte, RDV)</li>
+      <li>Optimisations perf suite aux métriques réelles</li>
+    </ul>
+
+    <h3>Jour 4 — I18n + chatbot WhatsApp</h3>
+    <ul>
+      <li>Traduction pulaar / susu / malinké (i18next + toggle langue)</li>
+      <li>Chatbot WhatsApp : questionnaire sans smartphone via webhook Meta</li>
+      <li>Module ordonnances PDF avec QR code pharmacie</li>
+    </ul>
+
+    <h3>Jour 5 — Pilote + marketing</h3>
+    <ul>
+      <li>Onboarding 3-5 médecins pilotes à Conakry (Ignace Deen, Donka, Pita)</li>
+      <li>Landing page publique + inscription médecins</li>
+      <li>Collecte feedback + itération rapide</li>
+      <li>Début déploiement large (extension régions Guinée)</li>
     </ul>
   </section>
 
@@ -771,6 +791,72 @@
       hémorragies (27%), hypertension/prééclampsie (14%), infections (11%),
       avortements à risque (8%), travail difficile (9%).
     </div>
+
+    <table style="margin-top: 14px;">
+      <thead>
+        <tr><th>Métrique dev</th><th>Sans Claude Code</th><th>Avec Claude Code</th><th>Gain</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Temps MVP complet</td><td>3-4 mois</td><td>2 semaines</td><td><strong>×8</strong></td></tr>
+        <tr><td>Coût développement équivalent</td><td>~15 000 €</td><td>~200 € (abo Claude)</td><td><strong>×75</strong></td></tr>
+        <tr><td>Lignes de code / jour</td><td>~150</td><td>~2000</td><td><strong>×13</strong></td></tr>
+        <tr><td>Agents / pipeline</td><td>1 dev</td><td>10 agents parallèles</td><td><strong>×10</strong></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--                    TESTER AVEC UN VRAI COMPTE                   -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <section>
+    <h2>Tester avec un vrai compte</h2>
+
+    <div class="lead">
+      Un compte médecin test est pré-configuré en production avec 4 patientes
+      réalistes (1 rouge · 1 orange · 2 vertes). Les collaborateurs peuvent
+      explorer l'app comme un vrai utilisateur, sans mode démo.
+    </div>
+
+    <h3>Compte de test pré-créé</h3>
+    <table>
+      <tbody>
+        <tr><td><strong>Rôle</strong></td><td>Médecin (Doctor)</td></tr>
+        <tr><td><strong>Nom</strong></td><td>Dr. Maladho Barry</td></tr>
+        <tr><td><strong>Téléphone</strong></td><td><code>+224 623 43 65 13</code></td></tr>
+        <tr><td><strong>Patientes liées</strong></td><td>4 (Aïssatou · Mariama · Fatoumata · Kadiatou)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Option 1 — Mode démo (recommandé pour les collègues)</h3>
+    <ol>
+      <li>Aller sur <code>https://mamacare-ai.vercel.app/login</code></li>
+      <li>Cliquer sur le bouton <strong>"Dr. Maladho Barry"</strong> (bleu)</li>
+      <li>Accès instantané au dashboard médecin avec données de démo</li>
+    </ol>
+
+    <h3>Option 2 — Connexion réelle (base de données)</h3>
+    <p>Prérequis : <strong>Twilio configuré dans Supabase Auth</strong> pour envoyer les OTP
+    (à activer dans Supabase Dashboard → Authentication → Phone).</p>
+    <ol>
+      <li>Aller sur <code>https://mamacare-ai.vercel.app/login</code></li>
+      <li>Cliquer <strong>"J'ai un compte"</strong> en bas</li>
+      <li>Entrer le numéro <code>623436513</code> (le préfixe +224 est ajouté)</li>
+      <li>Recevoir le code OTP par SMS (si Twilio configuré)</li>
+      <li>Entrer le code à 6 chiffres → connexion au vrai dashboard avec les 4 patientes</li>
+    </ol>
+
+    <h3>Tester le cycle complet d'une alerte</h3>
+    <ol>
+      <li>Se connecter en patiente démo (Aïssatou Diallo)</li>
+      <li>Remplir le questionnaire en répondant <strong>"oui"</strong> à Q4 (saignements)</li>
+      <li>Obtenir une alerte <span class="status status-todo">ROUGE</span> + explication IA Claude</li>
+      <li>Se reconnecter en médecin → voir l'alerte dans <code>/alerts</code></li>
+      <li>Résoudre l'alerte (bouton "Marquer traité")</li>
+    </ol>
+
+    <h3>Accès administrateur (superviseur plateforme)</h3>
+    <p>En cliquant le bouton démo <strong>"Admin"</strong> sur /login, accès à
+    la vue superviseur : liste de tous les médecins, stats globales, modération.</p>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -847,7 +933,7 @@
     </p>
     <p style="color: #9CA3AF; font-size: 9pt; margin-top: 30px;">
       Rapport généré le 24 avril 2026 · MamaCare AI v2.1-edge<br>
-      <strong>Mamadou Maladho Barry</strong> · Fondateur ImprOOve<br>
+      <strong>Mamadou Maladho Barry</strong> · Fondateur & Lead Developer<br>
       maladhob5@gmail.com · +224 623 43 65 13
     </p>
   </section>
