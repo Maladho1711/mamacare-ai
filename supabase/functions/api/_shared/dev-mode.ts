@@ -95,3 +95,64 @@ export async function verifyDevToken(token: string): Promise<DevTokenPayload> {
 
   return JSON.parse(new TextDecoder().decode(base64urlDecode(payloadB64))) as DevTokenPayload;
 }
+
+// ─── Phone tokens (vrais utilisateurs OTP-vérifiés) ──────────────────────────
+
+/** Payload d'un token OTP-vérifié — vrai utilisateur en prod */
+export interface PhoneTokenPayload {
+  sub: string;
+  role: 'doctor' | 'patient' | 'admin';
+  full_name: string;
+  phone: string;
+  iat: number;
+  exp: number;
+}
+
+/** Durée de validité d'un token phone — 30 jours */
+const PHONE_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Génère un token signé HMAC pour un utilisateur OTP-vérifié.
+ *  Format : `phone_<base64url(payload)>.<hmac>` */
+export async function signPhoneToken(profile: {
+  sub: string;
+  role: 'doctor' | 'patient' | 'admin';
+  full_name: string;
+  phone: string;
+}): Promise<string> {
+  const now = Date.now();
+  const payload: PhoneTokenPayload = {
+    ...profile,
+    iat: now,
+    exp: now + PHONE_TOKEN_TTL_MS,
+  };
+  const payloadB64 = base64urlEncode(new TextEncoder().encode(JSON.stringify(payload)));
+  const key = await getCryptoKey(getSigningKey());
+  const sigBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payloadB64));
+  const signature = base64urlEncode(sigBuffer);
+  return `phone_${payloadB64}.${signature}`;
+}
+
+/** Valide un token phone — vérifie signature ET expiration */
+export async function verifyPhoneToken(token: string): Promise<PhoneTokenPayload> {
+  if (!token.startsWith('phone_')) throw new Error('Not a phone token');
+  const [payloadB64, signature] = token.slice(6).split('.');
+  if (!payloadB64 || !signature) throw new Error('Malformed phone token');
+
+  const key = await getCryptoKey(getSigningKey());
+  const sigBytes = base64urlDecode(signature);
+  const valid = await crypto.subtle.verify(
+    'HMAC',
+    key,
+    sigBytes,
+    new TextEncoder().encode(payloadB64),
+  );
+
+  if (!valid) throw new Error('Invalid phone token signature');
+
+  const payload = JSON.parse(
+    new TextDecoder().decode(base64urlDecode(payloadB64)),
+  ) as PhoneTokenPayload;
+
+  if (Date.now() > payload.exp) throw new Error('Phone token expired');
+  return payload;
+}

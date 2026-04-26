@@ -40,7 +40,8 @@
 import { CORS_HEADERS, corsResponse, json, err } from './_shared/cors.ts';
 import { getAuthUser, requireAuth, requireDoctor, requirePatient, AuthUser } from './_shared/auth.ts';
 import { makeAdminClient } from './_shared/supabase.ts';
-import { isDevMode, signDevToken, DEV_PROFILES, DevRole } from './_shared/dev-mode.ts';
+import { isDevMode, signDevToken, signPhoneToken, DEV_PROFILES, DevRole } from './_shared/dev-mode.ts';
+import { sendNimbaSms } from './_shared/nimbasms.ts';
 import { evaluateWhoRules, EvaluationContext } from './_shared/who-rules.ts';
 import type { AlertLevel } from './_shared/who-rules.ts';
 import {
@@ -141,16 +142,56 @@ async function route(req: Request, path: string, url: URL): Promise<Response> {
 // AUTH HANDLERS
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** Normalise un numéro guinéen au format +224XXXXXXXXX */
+function normalizePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('224')) return `+${digits}`;
+  if (digits.length === 9) return `+224${digits}`;
+  return `+${digits}`;
+}
+
 async function handleSendOtp(req: Request): Promise<Response> {
   const { phone } = await req.json().catch(() => ({ phone: null }));
   if (!phone) return err('Téléphone requis');
 
   if (isDevMode()) return json({ sent: true });
 
+  const cleanPhone = normalizePhone(phone);
   const admin = makeAdminClient();
-  const { error } = await admin.auth.signInWithOtp({ phone, options: { channel: 'sms' } });
-  if (error) return err(error.message ?? "Impossible d'envoyer le code OTP", 401);
-  return json({ sent: true });
+
+  // Vérifier que le numéro existe dans profiles (sinon refuser — pas de signup ouvert)
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id, role')
+    .eq('phone', cleanPhone)
+    .maybeSingle();
+  if (!profile) {
+    return err('Numéro non reconnu — contactez votre médecin pour vous inscrire', 404);
+  }
+
+  // Générer un code 6 chiffres + expiration 5 min
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  const { error: insErr } = await admin.from('otp_codes').insert({
+    phone: cleanPhone,
+    code,
+    expires_at: expiresAt.toISOString(),
+  });
+  if (insErr) {
+    console.error('[otp] insert error', insErr);
+    return err('Erreur serveur OTP', 500);
+  }
+
+  // Envoyer via Nimba SMS (primary)
+  const message = `Votre code MamaCare AI : ${code}\nValide 5 minutes. Ne le partagez avec personne.`;
+  const result = await sendNimbaSms(cleanPhone, message);
+
+  if (!result.success) {
+    return err("Impossible d'envoyer le SMS — vérifiez le numéro", 500);
+  }
+
+  return json({ sent: true, expiresIn: 300 });
 }
 
 async function handleVerifyOtp(req: Request): Promise<Response> {
@@ -158,7 +199,6 @@ async function handleVerifyOtp(req: Request): Promise<Response> {
   if (!phone || !token) return err('Téléphone et code requis');
 
   if (isDevMode()) {
-    // En dev : redirection vers dev-login patient par défaut
     const accessToken = await signDevToken('patient');
     const profile = DEV_PROFILES['patient'];
     const now = new Date().toISOString();
@@ -168,18 +208,57 @@ async function handleVerifyOtp(req: Request): Promise<Response> {
     });
   }
 
+  const cleanPhone = normalizePhone(phone);
   const admin = makeAdminClient();
-  const { data, error } = await admin.auth.verifyOtp({ phone, token, type: 'sms' });
-  if (error || !data.user || !data.session) return err(error?.message ?? 'Code OTP invalide', 401);
 
+  // Récupérer le dernier code valide
+  const { data: otp } = await admin
+    .from('otp_codes')
+    .select('id, code, expires_at, attempts, consumed')
+    .eq('phone', cleanPhone)
+    .eq('consumed', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!otp) return err('Code expiré — demandez-en un nouveau', 401);
+
+  const otpRow = otp as { id: string; code: string; expires_at: string; attempts: number; consumed: boolean };
+
+  if (new Date(otpRow.expires_at) < new Date()) {
+    return err('Code expiré — demandez-en un nouveau', 401);
+  }
+  if (otpRow.attempts >= 5) {
+    return err('Trop de tentatives — demandez un nouveau code', 401);
+  }
+  if (otpRow.code !== String(token).trim()) {
+    await admin.from('otp_codes').update({ attempts: otpRow.attempts + 1 }).eq('id', otpRow.id);
+    return err('Code incorrect', 401);
+  }
+
+  // Marquer le code comme consommé
+  await admin.from('otp_codes').update({ consumed: true }).eq('id', otpRow.id);
+
+  // Récupérer le profil utilisateur
   const { data: profile } = await admin
     .from('profiles')
     .select('id, role, full_name, phone, created_at, updated_at')
-    .eq('id', data.user.id)
+    .eq('phone', cleanPhone)
     .single();
 
   if (!profile) return err('Profil utilisateur introuvable', 401);
-  return json({ accessToken: data.session.access_token, profile });
+
+  const profileRow = profile as { id: string; role: 'doctor' | 'patient' | 'admin'; full_name: string; phone: string; created_at: string; updated_at: string };
+
+  // Générer notre token JWT custom (signé HMAC, 30 jours)
+  const accessToken = await signPhoneToken({
+    sub: profileRow.id,
+    role: profileRow.role,
+    full_name: profileRow.full_name,
+    phone: profileRow.phone,
+  });
+
+  return json({ accessToken, profile });
 }
 
 async function handleDevLogin(req: Request): Promise<Response> {
