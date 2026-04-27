@@ -7,9 +7,10 @@ import { saveSession } from '@/lib/auth/session';
 import OtpInput from '@/components/auth/OtpInput';
 
 interface VerifyResponse {
+  accessToken: string;
   profile: {
     id:        string;
-    role:      'doctor' | 'patient';
+    role:      'doctor' | 'patient' | 'admin';
     full_name: string;
     phone:     string;
   };
@@ -21,6 +22,7 @@ export default function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
+  const devCode = searchParams.get('dev') || ''; // Mode test : code pré-rempli
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,14 +53,16 @@ export default function VerifyForm() {
       );
 
       saveSession({
-        token:    '',  // Token dans le cookie HttpOnly mc_token posé par le backend
+        token:    data.accessToken ?? '',
         userId:   data.profile.id,
         role:     data.profile.role,
         fullName: data.profile.full_name,
       });
 
       router.replace(
-        data.profile.role === 'doctor' ? '/dashboard' : '/questionnaire'
+        data.profile.role === 'doctor' || data.profile.role === 'admin'
+          ? '/dashboard'
+          : '/questionnaire',
       );
     } catch (err) {
       const message =
@@ -95,8 +99,17 @@ export default function VerifyForm() {
         <span className="font-medium text-gray-700">{maskedPhone}</span>
       </p>
 
+      {devCode && (
+        <div className="mb-4 px-3 py-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl">
+          <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">🧪 Mode test</p>
+          <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+            Code à utiliser : <strong className="font-mono text-base">{devCode}</strong>
+          </p>
+        </div>
+      )}
+
       <div className="mb-6">
-        <OtpInput onComplete={handleVerify} disabled={loading} />
+        <OtpInput onComplete={handleVerify} disabled={loading} initialValue={devCode} />
       </div>
 
       {loading && (

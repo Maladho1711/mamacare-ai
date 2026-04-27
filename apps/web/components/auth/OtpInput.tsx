@@ -1,16 +1,28 @@
 'use client';
 
-import { useRef, useState, useCallback, type KeyboardEvent, type ClipboardEvent } from 'react';
+import { useRef, useState, useCallback, useEffect, type KeyboardEvent, type ClipboardEvent } from 'react';
 
 interface OtpInputProps {
   length?: number;
   onComplete: (code: string) => void;
   disabled?: boolean;
+  /** Pré-remplir l'OTP (utile en mode test pour faciliter la validation) */
+  initialValue?: string;
 }
 
-export default function OtpInput({ length = 6, onComplete, disabled = false }: OtpInputProps) {
-  const [values, setValues] = useState<string[]>(Array(length).fill(''));
+export default function OtpInput({ length = 6, onComplete, disabled = false, initialValue }: OtpInputProps) {
+  const [values, setValues] = useState<string[]>(() => {
+    if (initialValue && initialValue.length === length) return initialValue.split('');
+    return Array(length).fill('');
+  });
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Auto-submit en mode test
+  useEffect(() => {
+    if (initialValue && initialValue.length === length && /^\d+$/.test(initialValue)) {
+      onComplete(initialValue);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const focusInput = useCallback((index: number) => {
     if (index >= 0 && index < length) {

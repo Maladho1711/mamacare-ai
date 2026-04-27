@@ -98,6 +98,8 @@ async function route(req: Request, path: string, url: URL): Promise<Response> {
   if (path === '/auth/verify-otp' && method === 'POST') return handleVerifyOtp(req);
   if (path === '/auth/dev-login' && method === 'POST') return handleDevLogin(req);
   if (path === '/auth/me' && method === 'GET') return handleMe(req);
+  if (path === '/auth/register-doctor' && method === 'POST') return handleRegisterDoctor(req);
+  if (path === '/auth/magic-link' && method === 'POST') return handleConsumeMagicLink(req);
 
   // ─── PATIENTS ──────────────────────────────────────────────────────────────
   if (path === '/patients' && method === 'GET') return listPatients(req, url);
@@ -159,7 +161,7 @@ async function handleSendOtp(req: Request): Promise<Response> {
   const cleanPhone = normalizePhone(phone);
   const admin = makeAdminClient();
 
-  // Vérifier que le numéro existe dans profiles (sinon refuser — pas de signup ouvert)
+  // Vérifier que le numéro existe dans profiles (sinon refuser)
   const { data: profile } = await admin
     .from('profiles')
     .select('id, role')
@@ -183,15 +185,28 @@ async function handleSendOtp(req: Request): Promise<Response> {
     return err('Erreur serveur OTP', 500);
   }
 
-  // Envoyer via Nimba SMS (primary)
+  // Envoyer via Nimba SMS (primary) si configuré
+  const nimbaConfigured = !!Deno.env.get('NIMBA_SERVICE_ID') && !!Deno.env.get('NIMBA_SECRET_TOKEN');
   const message = `Votre code MamaCare AI : ${code}\nValide 5 minutes. Ne le partagez avec personne.`;
-  const result = await sendNimbaSms(cleanPhone, message);
 
-  if (!result.success) {
-    return err("Impossible d'envoyer le SMS — vérifiez le numéro", 500);
+  if (nimbaConfigured) {
+    const result = await sendNimbaSms(cleanPhone, message);
+    if (!result.success) {
+      return err("Impossible d'envoyer le SMS — vérifiez le numéro", 500);
+    }
+    return json({ sent: true, expiresIn: 300 });
   }
 
-  return json({ sent: true, expiresIn: 300 });
+  // ── MODE TEST : Nimba pas configuré → on retourne le code dans la réponse ──
+  // Permet de tester l'OTP avant d'avoir un compte SMS
+  console.log(`[otp][test-mode] code pour ${cleanPhone} = ${code}`);
+  return json({
+    sent: true,
+    expiresIn: 300,
+    testMode: true,
+    devCode: code,
+    message: 'Mode test : le SMS n\'est pas envoyé. Le code est ci-dessus (devCode).',
+  });
 }
 
 async function handleVerifyOtp(req: Request): Promise<Response> {
@@ -281,6 +296,215 @@ async function handleDevLogin(req: Request): Promise<Response> {
       updated_at: now,
     },
   });
+}
+
+/**
+ * Inscription publique médecin.
+ * Crée un user dans auth.users + profile, retourne soit un code OTP test
+ * soit envoie un SMS Nimba avec le code.
+ */
+async function handleRegisterDoctor(req: Request): Promise<Response> {
+  const dto = await req.json().catch(() => ({})) as {
+    fullName?: string;
+    phone?: string;
+    hospital?: string;
+    specialty?: string;
+  };
+
+  if (!dto.fullName || !dto.phone) {
+    return err('Nom et téléphone requis');
+  }
+
+  const cleanPhone = normalizePhone(dto.phone);
+  const admin = makeAdminClient();
+
+  // Vérifier qu'aucun profil n'existe déjà avec ce numéro
+  const { data: existing } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('phone', cleanPhone)
+    .maybeSingle();
+  if (existing) {
+    return err('Ce numéro est déjà inscrit — utilisez "Se connecter"', 409);
+  }
+
+  // Créer auth.users + profile
+  // Workaround : Supabase Auth refuse les users phone-only sans Twilio configuré.
+  // On génère un email synthétique depuis le numéro pour contourner cette contrainte.
+  // La connexion réelle se fait ensuite via notre OTP custom (Nimba) ou magic link.
+  let userId: string;
+  const syntheticEmail = `${cleanPhone.replace(/[^\d]/g, '')}@phone.mamacare.local`;
+  try {
+    const { data: authUser, error: authErr } = await admin.auth.admin.createUser({
+      email: syntheticEmail,
+      email_confirm: true,
+      phone: cleanPhone,
+      phone_confirm: true,
+      user_metadata: { full_name: dto.fullName, real_phone: cleanPhone },
+    });
+    if (authErr || !authUser?.user) {
+      console.error('[register-doctor] auth.users error', authErr);
+      return err('Erreur création compte: ' + (authErr?.message ?? 'inconnue'), 500);
+    }
+    userId = authUser.user.id;
+  } catch (e) {
+    console.error('[register-doctor] exception', e);
+    return err('Erreur création compte', 500);
+  }
+
+  // Le trigger handle_new_user a déjà créé un profil basique (rôle 'patient' par défaut)
+  // On le met à jour avec les infos médecin complètes (UPSERT pour gérer les 2 cas).
+  const { error: profErr } = await admin
+    .from('profiles')
+    .upsert({
+      id: userId,
+      role: 'doctor',
+      full_name: dto.fullName,
+      phone: cleanPhone,
+      hospital: dto.hospital ?? null,
+      specialty: dto.specialty ?? null,
+    });
+  if (profErr) {
+    console.error('[register-doctor] profile error', profErr);
+    return err('Erreur création profil: ' + profErr.message, 500);
+  }
+
+  // Générer + envoyer OTP comme dans handleSendOtp
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+  await admin.from('otp_codes').insert({
+    phone: cleanPhone,
+    code,
+    expires_at: expiresAt.toISOString(),
+  });
+
+  const nimbaConfigured = !!Deno.env.get('NIMBA_SERVICE_ID') && !!Deno.env.get('NIMBA_SECRET_TOKEN');
+  const message = `Bienvenue sur MamaCare AI !\nVotre code de connexion : ${code}\nValide 5 minutes.`;
+
+  if (nimbaConfigured) {
+    await sendNimbaSms(cleanPhone, message);
+    return json({
+      success: true,
+      phone: cleanPhone,
+      message: 'Compte créé. Code envoyé par SMS.',
+    });
+  }
+
+  // Mode test
+  console.log(`[register-doctor][test] code ${code} pour ${cleanPhone}`);
+  return json({
+    success: true,
+    phone: cleanPhone,
+    testMode: true,
+    devCode: code,
+    message: 'Compte créé. Mode test : code ci-dessus (devCode).',
+  });
+}
+
+/**
+ * Consume un magic link → retourne un token JWT phone.
+ * Utilisé pour les patientes invitées par leur médecin (workflow alternatif au SMS).
+ */
+async function handleConsumeMagicLink(req: Request): Promise<Response> {
+  const { token } = await req.json().catch(() => ({ token: null }));
+  if (!token) return err('Token requis');
+
+  const admin = makeAdminClient();
+
+  // Récupérer le magic link
+  const { data: link } = await admin
+    .from('magic_links')
+    .select('*')
+    .eq('token', token)
+    .eq('consumed', false)
+    .maybeSingle();
+
+  if (!link) return err('Lien invalide ou déjà utilisé', 404);
+
+  const linkRow = link as {
+    token: string;
+    phone: string;
+    user_id: string | null;
+    patient_id: string | null;
+    expires_at: string;
+  };
+
+  if (new Date(linkRow.expires_at) < new Date()) {
+    return err('Lien expiré', 410);
+  }
+
+  // Marquer comme consommé
+  await admin
+    .from('magic_links')
+    .update({ consumed: true, consumed_at: new Date().toISOString() })
+    .eq('token', token);
+
+  // Récupérer ou créer le profil
+  let userId = linkRow.user_id;
+
+  if (!userId && linkRow.patient_id) {
+    // Workflow patiente : créer auth.users + lier au patients.user_id
+    try {
+      const syntheticEmail = `${linkRow.phone.replace(/[^\d]/g, '')}@phone.mamacare.local`;
+      const { data: authUser } = await admin.auth.admin.createUser({
+        email: syntheticEmail,
+        email_confirm: true,
+        phone: linkRow.phone,
+        phone_confirm: true,
+      });
+      if (authUser?.user) {
+        userId = authUser.user.id;
+        // Récupérer le patient pour avoir son full_name
+        const { data: patient } = await admin
+          .from('patients')
+          .select('full_name')
+          .eq('id', linkRow.patient_id)
+          .single();
+        const fullName = (patient as { full_name: string } | null)?.full_name ?? 'Patiente';
+        // Upsert le profil (le trigger a peut-être déjà créé un profil basique)
+        await admin.from('profiles').upsert({
+          id: userId,
+          role: 'patient',
+          full_name: fullName,
+          phone: linkRow.phone,
+        });
+        // Lier patient.user_id
+        await admin.from('patients').update({ user_id: userId }).eq('id', linkRow.patient_id);
+      }
+    } catch (e) {
+      console.error('[magic-link] erreur création patient', e);
+      return err('Erreur création compte patiente', 500);
+    }
+  }
+
+  if (!userId) return err('Compte introuvable', 500);
+
+  // Récupérer le profil
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id, role, full_name, phone, created_at, updated_at')
+    .eq('id', userId)
+    .single();
+
+  if (!profile) return err('Profil introuvable', 500);
+
+  const p = profile as {
+    id: string;
+    role: 'doctor' | 'patient' | 'admin';
+    full_name: string;
+    phone: string;
+    created_at: string;
+    updated_at: string;
+  };
+
+  const accessToken = await signPhoneToken({
+    sub: p.id,
+    role: p.role,
+    full_name: p.full_name,
+    phone: p.phone,
+  });
+
+  return json({ accessToken, profile });
 }
 
 async function handleMe(req: Request): Promise<Response> {
@@ -375,12 +599,14 @@ async function createPatient(req: Request): Promise<Response> {
   };
 
   const admin = makeAdminClient();
+  const cleanPhone = normalizePhone(dto.phone);
+
   const { data, error } = await admin
     .from('patients')
     .insert({
       doctor_id: user.id,
       full_name: dto.fullName,
-      phone: dto.phone,
+      phone: cleanPhone,
       pregnancy_start: dto.pregnancyStart,
       expected_term: dto.expectedTerm,
       notes: dto.notes ?? null,
@@ -392,12 +618,37 @@ async function createPatient(req: Request): Promise<Response> {
 
   if (error) return err(error.message, 500);
 
-  // SMS d'onboarding (non bloquant)
-  const message = `Bonjour ${dto.fullName} ! Votre médecin vous a inscrite sur MamaCare AI. ` +
-    `Remplissez votre questionnaire quotidien ici : ${PWA_URL}\nRépondez STOP pour vous désabonner.`;
-  sendSms(dto.phone, message).catch((e) => console.error('[createPatient] SMS onboarding', e));
+  const patientRow = data as Record<string, unknown>;
+  const patientId = patientRow.id as string;
 
-  return json(mapPatientRow(data as Record<string, unknown>));
+  // Générer un magic link valable 7 jours pour permettre à la patiente de se connecter
+  const { data: linkData } = await admin
+    .from('magic_links')
+    .insert({
+      phone: cleanPhone,
+      patient_id: patientId,
+    })
+    .select('token')
+    .single();
+
+  const magicToken = (linkData as { token: string } | null)?.token;
+  const magicLink = magicToken ? `${PWA_URL}/auth/callback?token=${magicToken}` : null;
+
+  // Envoyer le SMS d'onboarding via Nimba (si configuré) avec le magic link
+  const nimbaConfigured = !!Deno.env.get('NIMBA_SERVICE_ID') && !!Deno.env.get('NIMBA_SECRET_TOKEN');
+  if (nimbaConfigured && magicLink) {
+    const message = `Bonjour ${dto.fullName} ! Votre médecin vous a inscrite sur MamaCare AI.\n` +
+      `Cliquez ici pour activer votre compte : ${magicLink}\n(Lien valide 7 jours)`;
+    sendNimbaSms(cleanPhone, message).catch((e) => console.error('[createPatient] sms', e));
+  }
+
+  // Retourner aussi le magic link pour que le médecin puisse le partager manuellement
+  // (par WhatsApp, en personne...) en attendant Nimba
+  return json({
+    ...mapPatientRow(patientRow),
+    magicLink,
+    smsSent: nimbaConfigured,
+  });
 }
 
 async function getPatient(req: Request, id: string): Promise<Response> {

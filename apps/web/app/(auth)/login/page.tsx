@@ -120,13 +120,20 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="border-t border-gray-100 px-6 py-3">
+          <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-3 space-y-1.5">
             <button
               type="button"
               onClick={() => setShowOtp(true)}
-              className="w-full text-xs text-gray-400 hover:text-[#E91E8C] transition-colors text-center py-1"
+              className="w-full text-xs text-gray-500 dark:text-gray-400 hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors text-center py-1"
             >
-              J'ai un compte → Se connecter avec mon numéro
+              🔑 J&apos;ai un compte → Se connecter avec mon numéro
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/signup')}
+              className="w-full text-xs text-gray-500 dark:text-gray-400 hover:text-[#E91E8C] dark:hover:text-[#E91E8C] transition-colors text-center py-1"
+            >
+              ✨ Pas encore de compte → Créer un compte médecin
             </button>
           </div>
         </div>

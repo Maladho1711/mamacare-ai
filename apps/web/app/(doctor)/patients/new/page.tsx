@@ -98,7 +98,7 @@ export default function NewPatientPage() {
     try {
       const phone = form.phone.replace(/\D/g, '');
       const phoneE164 = phone.startsWith('224') ? `+${phone}` : `+224${phone}`;
-      await apiClient.post('/patients', {
+      const result = await apiClient.post<{ magicLink?: string; smsSent?: boolean }>('/patients', {
         fullName:       form.fullName.trim(),
         phone:          phoneE164,
         pregnancyStart: form.pregnancyStart,
@@ -106,7 +106,21 @@ export default function NewPatientPage() {
         status:         form.status,
         notes:          form.notes.trim() || undefined,
       });
-      showToast('Patiente créée avec succès', 'success');
+
+      // Si SMS pas envoyé (Nimba pas configuré), afficher le magic link à partager
+      if (result.magicLink && !result.smsSent) {
+        try {
+          await navigator.clipboard.writeText(result.magicLink);
+        } catch {
+          /* ignore */
+        }
+        const msg = `Patiente créée. SMS d'invitation pas envoyé (Nimba non configuré).\n\n` +
+          `Lien d'invitation copié dans le presse-papier — partage-le par WhatsApp à la patiente :\n\n${result.magicLink}\n\n` +
+          `Valide 7 jours.`;
+        alert(msg);
+      } else {
+        showToast('Patiente créée — SMS d\'invitation envoyé', 'success');
+      }
       router.push('/patients');
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : 'Erreur lors de la création.';
