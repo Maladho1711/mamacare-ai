@@ -221,11 +221,15 @@ export function getDemoResponse<T>(rawPath: string, method: string): T {
 }
 
 /**
- * Détecté au runtime via le cookie — fiable même sans variable d'env.
- * Le token 'DEMO_TOKEN' est posé par handleDemoLogin dans login/page.tsx.
+ * Mode démo désactivé en production réelle.
+ * Plus aucun bouton démo n'est exposé sur /login depuis avril 2026 — toutes les
+ * connexions passent par le vrai flux OTP. L'intercepteur reste dans le code
+ * pour pouvoir réactiver le mode démo en dev (NEXT_PUBLIC_DEMO_MODE=true).
  */
 export function isDemoMode(): boolean {
   if (typeof document === 'undefined') return false;
+  // Activable uniquement en dev local avec env var explicite
+  if (process.env.NEXT_PUBLIC_DEMO_MODE !== 'true') return false;
   return document.cookie.includes('mc_session=') &&
     decodeURIComponent(document.cookie).includes('"token":"DEMO_TOKEN"');
 }

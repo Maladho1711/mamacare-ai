@@ -14,13 +14,13 @@ import { getDemoResponse, isDemoMode } from '@/lib/demo/interceptor';
 
 /**
  * URL de l'API — résolue dans l'ordre suivant :
- * 1. NEXT_PUBLIC_SUPABASE_URL + /functions/v1/api (Edge Function — mode standard)
- * 2. NEXT_PUBLIC_API_URL (override explicite — dev local uniquement)
- * 3. http://localhost:3001 (fallback dernière chance)
- *
- * En production, on privilégie TOUJOURS la Supabase Edge Function, même si
- * NEXT_PUBLIC_API_URL pointe encore vers l'ancien NestJS (hérité .env.local).
+ * 1. NEXT_PUBLIC_SUPABASE_URL + /functions/v1/api (Edge Function — config Vercel)
+ * 2. Hardcoded fallback : projet MamaCare AI (jnkabdrqmdgefamahysc)
+ *    → garantit que la prod marche même si l'env var Vercel n'est pas posée
+ * 3. localhost:3001 uniquement quand on tourne en dev local (window.location)
  */
+const MAMACARE_PROD_API = 'https://jnkabdrqmdgefamahysc.supabase.co/functions/v1/api';
+
 function resolveApiUrl(): string {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (
@@ -31,9 +31,19 @@ function resolveApiUrl(): string {
     return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/api`;
   }
 
-  const explicit = process.env.NEXT_PUBLIC_API_URL;
-  if (explicit && explicit.length > 0) return explicit;
+  // Fallback : si on est dans le navigateur ET pas en localhost, on utilise la prod
+  if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+    return MAMACARE_PROD_API;
+  }
 
+  // Dev local — accepte une override NEXT_PUBLIC_API_URL pour pointer ailleurs
+  const explicit = process.env.NEXT_PUBLIC_API_URL;
+  if (explicit && explicit.length > 0 && !explicit.includes('localhost:3001')) {
+    return explicit;
+  }
+
+  // Dernier fallback dev : pour ne pas crasher en SSR sans env
+  if (typeof window === 'undefined') return MAMACARE_PROD_API;
   return 'http://localhost:3001';
 }
 
